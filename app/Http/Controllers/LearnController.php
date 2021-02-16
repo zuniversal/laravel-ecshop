@@ -8,6 +8,22 @@ use Illuminate\Http\Request;
 // 注意 控制器名需要与文件名一致 不然框架加载不了 报错 类无法找到
 class LearnController extends Controller
 {
+    // 3-5
+    public function __construct() { 
+        // $this->middleware(Benchmark::class);
+        // $this->middleware('benchmark');// 别名方式 
+        $this->middleware(
+                'benchmark:name1,name2', // 也可以改成中间件组 并且可以传参 如 'auth:admin,guster'
+            [
+            // 'except' => [
+            //     'hello',
+            // ],
+            'only' => [
+                'hello',
+            ],
+
+        ]);//  
+    }
 
     public function hello()
     {

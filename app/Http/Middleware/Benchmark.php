@@ -15,7 +15,10 @@ class Benchmark
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next,
+        $a,
+        $b
+    )
     {
         // return $next($request);
 
@@ -31,6 +34,8 @@ class Benchmark
                 'url' => $request->url(),
                 'input' => $request->input(),
                 'time' => $runTime,
+                '$a' => $a,
+                '$b' => $b,
 
             ]
         );
