@@ -30,7 +30,8 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        // 3-3 对参数全局设置
+        // Route::pattern('id', '[0-9]+');
 
         parent::boot();
     }
@@ -46,7 +47,16 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapWebRoutes();
 
-        //
+        // 3-3
+        // $this->mapAdminRoutes();
+    }
+    // 3-3
+    protected function mapAdminRoutes()
+    {
+        Route::prefix('admin')
+            ->middleware('admin')
+            ->namespace($this->namespace)
+            ->group(base_path('routes/admin.php'));
     }
 
     /**

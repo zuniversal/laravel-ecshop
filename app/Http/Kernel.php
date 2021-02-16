@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\Benchmark;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -37,6 +38,8 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             // \App\Http\Middleware\VerifyCsrfToken::class,// 3-2 注释到
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            // Benchmark::class,// 3-4
+            // 'benchmark',// 3-4
         ],
 
         'api' => [
@@ -63,5 +66,7 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        // 3-4 只是注册声明
+        'benchmark' => Benchmark::class,
     ];
 }
