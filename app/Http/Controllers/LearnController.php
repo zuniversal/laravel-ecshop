@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Middleware\Benchmark;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 // 注意 控制器名需要与文件名一致 不然框架加载不了 报错 类无法找到
 class LearnController extends Controller
@@ -54,4 +55,12 @@ class LearnController extends Controller
     {
         return 'getUser';
     }
+    // 3-6
+    public function dbTest()
+    {
+        DB::select('select * from user');
+        return 'dbTest';
+    }
+
+    
 }

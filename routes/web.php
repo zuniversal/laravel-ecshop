@@ -88,3 +88,7 @@ Route::any('/learn/getUrl',  function () {
         
     ];
 });
+
+Route::any('/learn/dbTest', 'LearnController@dbTest');// 
+
+
