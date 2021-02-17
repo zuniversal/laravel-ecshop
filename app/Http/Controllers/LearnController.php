@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\Benchmark;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -94,8 +95,35 @@ class LearnController extends Controller
         $res = DB::table('users')->where('id', 4)->exists();
         $res = DB::table('users')->where('id', 4)->doesntExist();
 
+        // 3-8 where语句  dump 语句都会跟着打印出 并且有一个 array 条件参数 数组 + 最后的 dd 结果语句
+        // select * from users where id 2 1;
+        $res = DB::table('users')->where('id', '>', 1)->dump();
+        // select * from users where id <> 1;
+        $res = DB::table('users')->where('id', '<>', 1)->dump();
+        $res = DB::table('users')->where('id', '!=', 1)->dump();
+        // select * from users where name like " tan;' ;
+        $res = DB::table('users')->where('name', 'like', 'zyb%')->dump();
+        // select * from users where id > 1 or name like 'tan%s' ;
+        $res = DB::table('users')->where('id', '>', 1)->orWhere('name', 'like', 'zyb%')->dump();
+        // select * from users where id > 1 and (email like 'x@163' or name like 'tan%');
+        // and 后面的内容也应该是 where 语句   括号括起来的语句 使用 闭包的方式来书写
+        $res = DB::table('users')->where('id', '>', 1)->where(function(Builder $query) {
+            $query->where('email', 'like', '163%')
+            ->orWhere('name', 'like', 'zyb%');
+        })->dump();
+        // select * from users where id in (1,3);
+        $res = DB::table('users')->whereIn('id', [1, 3])->dump();
+        // select * from users where id not in (1,3); 
+        $res = DB::table('users')->whereNotIn('id', [1, 3])->dump();
+        // select * from users where created_at is null;
+        $res = DB::table('users')->whereNull('created_at')->dump();
+        // select * from users where created_at is not null;
+        $res = DB::table('users')->whereNotNull('created_at')->dump();
 
-        
+        // select * from users where name "=" email ;
+        // 中间操作符 不传 默认是 = 
+        $res = DB::table('users')->whereColumn('name', 'email')->dump();
+
         dd($res);
 
         return $res; 
