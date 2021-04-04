@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\Benchmark;
+use Exception;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 // 注意 控制器名需要与文件名一致 不然框架加载不了 报错 类无法找到
 class LearnController extends Controller
@@ -80,7 +82,7 @@ class LearnController extends Controller
         // 方法返回的是一个 Illuminate\Support\Collection  集合对象 里面有个 items 属性 里面就是想要的结果 
         // 集合只是对php数组进行封装 增加了一些数组相关的操作函数使用 
         // $res = DB::table('users')->where([ 'id' => 1, ])->get();
-        // $res = DB::table('users')->find(1);// 查询的结果就是一个对象
+        // $res = DB::table('users')->find(1);// 查询的结果就是一个对象  可以通过主键查询对象
         $res = DB::table('users')->where([ 'id' => 2, ])->first();// 返回 查询的第一个对象结果
         $res = DB::table('users')->where([ 'id' => 2, ])->value('name');// 只需要其中一个值结果
         $res = DB::table('users')->pluck('name');// 获取一列数据
@@ -95,8 +97,8 @@ class LearnController extends Controller
         $res = DB::table('users')->where('id', 4)->exists();
         $res = DB::table('users')->where('id', 4)->doesntExist();
 
-        // 3-8 where语句  dump 语句都会跟着打印出 并且有一个 array 条件参数 数组 + 最后的 dd 结果语句
-        // select * from users where id 2 1;
+        // 3-9 where语句  dump 语句都会跟着打印出 并且有一个 array 条件参数 数组 + 最后的 dd 结果语句
+        // select * from users where id > 1;
         $res = DB::table('users')->where('id', '>', 1)->dump();
         // select * from users where id <> 1;
         $res = DB::table('users')->where('id', '<>', 1)->dump();
@@ -121,8 +123,113 @@ class LearnController extends Controller
         $res = DB::table('users')->whereNotNull('created_at')->dump();
 
         // select * from users where name "=" email ;
-        // 中间操作符 不传 默认是 = 
+        // 中间操作符 不传 默认是 =   比较2列的子是否相等 
         $res = DB::table('users')->whereColumn('name', 'email')->dump();
+
+
+        // 3-10
+        // $res = DB::table('users')->insert([ 
+        //     'name' => 'xxx', 
+        //     'password' => Hash::make(123), 
+        //     'email' => '604qq.com', 
+        // ]);
+        // // 批量插入
+        // $res = DB::table('users')->insert([ 
+        //     [ 
+        //         'name' => 'ba', 
+        //         'password' => Hash::make(123), 
+        //         'email' => '601qq.com', 
+        //     ], 
+        //     [ 
+        //         'name' => 'bb', 
+        //         'password' => Hash::make(123), 
+        //         'email' => '602qq.com', 
+        //     ],
+        // ]);
+        // 插入或忽略 掉重复写入的错误
+        // $res = DB::table('users')->insertOrIgnore([ 
+        //     'name' => 'xxx', 
+        //     'password' => Hash::make(123), 
+        //     'email' => '604qq.com', 
+        // ]);
+        // 插入并获取id
+        // $res = DB::table('users')->insertGetId([ 
+        //     'name' => 'xxx', 
+        //     'password' => Hash::make(123), 
+        //     'email' => '604qq.com', 
+        // ]);
+
+
+        // $res = DB::table('users')
+        //     ->where('id', 4)
+        //     ->update([ 
+        //         'name' => 'xxx', 
+        //         'email' => '604qq.com', 
+        //     ]);
+
+
+        // // 插入或忽略  如果查询到数据存在就更新 不存在就把参数的值合并插入
+        // $res = DB::table('users')
+        //     ->updateOrInsert(
+        //     ['id' => 33],
+        //     [ 
+        //         'name' => 'aa', 
+        //         'email' => '333qq.com', 
+        //         'password' => Hash::make(123), 
+        //     ]);
+
+        // 字段 自增 自减
+        $res = DB::table('users')
+            ->where('id', 4)
+            // ->increment('score', '10')
+            ->decrement('score', 5);
+
+        // 删除
+        $res = DB::table('users')
+            ->where('id', 5)
+            ->delete();
+
+
+        // 事物 
+        function transactionFn() {
+            $res = DB::table('users')
+                ->where('id', 4)
+                ->update([ 
+                    'name' => 'dddddd', 
+                ]);
+            // 如果没有开启事物 会导致第一条操作成功 第二条不是
+            // throw new \Exception();
+            $res = DB::table('users')
+                ->where('id', 5)
+                ->update([ 
+                    'name' => 'bbbbbb', 
+                ]);
+        }
+        // 1. 闭包 自动提交 回滚 还可以增加重试次数
+        $res = DB::transaction(function () {
+            transactionFn();
+            // $res = DB::table('users')
+            //     ->where('id', 4)
+            //     ->update([ 
+            //         'name' => 'vvvvvv', 
+            //     ]);
+            // // 如果没有开启事物 会导致第一条操作成功 第二条不是
+            // throw new \Exception();
+            // $res = DB::table('users')
+            //     ->where('id', 5)
+            //     ->update([ 
+            //         'name' => 'bbbbbb', 
+            //     ]);
+        });
+
+        // 2.手动 繁琐一点 但是使用更灵活可以控制何时回滚  在 try catch 里开启事物 执行语句再提交
+        // try {
+        //     DB::beginTransaction();
+        //     transactionFn();
+        //     DB::commit();
+        // } catch (\Throwable $th) {
+        //     DB::rollBack();
+        // }
 
         dd($res);
 
