@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\Benchmark;
+use App\Models\Product;
 use Exception;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
@@ -237,5 +238,59 @@ class LearnController extends Controller
         return 'dbTest';
     }
 
+
+    // 当访问时报错 fillable 没有title这个字段 原因 fillable 是字段白名单 调用 create 方法必须写到里面 
+    // Add [title] to fillable property to allow mass assignment on [App\Models\Product].
+    function modelUse() {
+        // Product::create();// 这样没有代码提示   
+        // 返回模型对象 
+        $data = [
+            'title' => '标题',
+            'category_id' => 1,
+            'is_on_sale' => 1,
+            'price' => '1200',
+            'attr' => [
+                '高' => '10cm',
+                '容积' => '200ml',
+            ],
+            // 'attr' => 'null',// 注意 如果model 没有设置 casts 自动转换类型的话 在调用create方法时 需要手动转化为 字符串
+        ];
+        // $product = Product::query()->create($data);// 加上 query 即可有提示  query 其实就是返回一个查询构造器 通过它来创建一个模型         
+        
+        // insert 返回 布尔值 而且没有更改 的 fillable 限制   attr 需要手动转化为 字符串
+        // 是个普通的查询构造器 并且因为没有经过model  所以插入的数据没有被 自动维护 时间戳字段 
+        // 只是通过模型转化为查询构造器 再通过查询构造器转化为 sql 不推荐这种方式 
+        $data2 = [
+            'title' => '标题',
+            'category_id' => 1,
+            'is_on_sale' => 1,
+            'price' => '1200',
+            'attr' => json_encode([
+                '高' => '10cm',
+                '容积' => '200ml',
+            ]),
+        ];
+        // $product = Product::query()->insert($data2);
+        // $product = DB::table('products')->insert($data2);
+
+        // 同样需要设置 fillable 
+        $product = new Product();
+        $product->fill($data);
+        // 除了使用 fill 方式 还可以使用 属性赋值方式
+        $product->title = 'zyb';
+        // $product->save();// 需要使用 save 方法才会插入 并且返回 布尔值 
+
+        // $product = Product::all();
+        // $product = Product::get();// 没有提示
+        $product = Product::query()
+        ->where('is_on_sale', 1)// 有库存的 
+        ->get();
+
+        // 其实 每个模型都可以充当 查询构造器 使用方法与之前说的类似 例如 query() 之后跟上 where 语句等 
+
+        // 还可以通过 先创建一个模型 
+        dd($product);
+        // 打开 attributes: array:8 [  可以看到具体的参数值 
+    }
     
 }
