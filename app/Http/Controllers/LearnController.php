@@ -273,12 +273,16 @@ class LearnController extends Controller
         // $product = Product::query()->insert($data2);
         // $product = DB::table('products')->insert($data2);
 
+        // 直接对模型进行操作  save 方法加入数据已存在数据库会修改  不存在就新增 
         // 同样需要设置 fillable 
         $product = new Product();
         $product->fill($data);
         // 除了使用 fill 方式 还可以使用 属性赋值方式
         $product->title = 'zyb';
         // $product->save();// 需要使用 save 方法才会插入 并且返回 布尔值 
+
+
+
 
         // $product = Product::all();
         // $product = Product::get();// 没有提示
@@ -288,8 +292,31 @@ class LearnController extends Controller
 
         // 其实 每个模型都可以充当 查询构造器 使用方法与之前说的类似 例如 query() 之后跟上 where 语句等 
 
+        // 3-13
+        // $product = Product::query()
+        // ->where(['id' => '2', ])// 有库存的 
+        // ->update(['is_on_sale' => 0]);
+
+        // 先查询出来数据 然后在进行修改 
+        // 需要在编写迁移文件的时候使用 SoftDeletes 属性  并且模型也需要 use 
+        $productDeleted = Product::withTrashed()->find(3);// 找出被软删除的数据
+        $productDeleted->restore();// 撤销软删除的数据 将 deleted_at 字段置null  
+        // $productDeleted = Product::withoutTrashed()->find(3);// 找出不是软删除的数据
+        dd($productDeleted);
+        $product = Product::query()->find(3);
+        // $product->title = 'zyb';// 注意 如果给 null 对象赋值 会报错 Creating default object from empty value
+        // $product->save();
+        dd($product);// 查看删除后的数据是否还在 删除后查询到的是个 null 
+        // $res = $product->delete();//硬删除
+        // use SoftDeletes;// 3-13 软删除 表的 deleted_at 会有删除时间
+
+        // 删除 同样可以使用 上面这样查询构造器的方式查询出来 然后 delete 
+
+
+        // dd($res);// 9
+
         // 还可以通过 先创建一个模型 
-        dd($product);
+        // dd($product);
         // 打开 attributes: array:8 [  可以看到具体的参数值 
     }
     
