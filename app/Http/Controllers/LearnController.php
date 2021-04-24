@@ -7,6 +7,7 @@ use App\Models\Product;
 use Exception;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -319,5 +320,189 @@ class LearnController extends Controller
         // dd($product);
         // 打开 attributes: array:8 [  可以看到具体的参数值 
     }
-    
+
+    // 3-14
+    function collection() {
+
+        // 获取值的方法
+        $collect = collect([1, 2, 3]);
+        // dd($collect->toArray());// 反向获取到我们传入的数组 
+        $collect = collect([
+            'k1' => 'v1',
+            'k2' => 'v2',
+            'k3' => 'v3',
+        ]);
+        // dd($collect->keys()->toArray());
+        // dd($collect->values()->toArray());
+        // dd($collect->last());
+
+        // Illuminate\Support\Collection {#283 ▼
+        //     #items: array:2 [▼
+        //       "k1" => "v1"
+        //       "k2" => "v2"
+        //     ]
+        //   }
+        $res = $collect->only([
+            'k1',
+            'k2',
+        ]);
+        // dd($res);
+
+        // array:2 [▼
+        //     "k1" => "v1"
+        //     "k2" => "v2"
+        // ]
+        $res->dump();
+
+
+
+        // 鼠标放到 all 上面可以看到 返回的也是个集合 
+        // @return \Illuminate\Database\Eloquent\Collection|static[]
+        $product = Product::all();
+        $product->pluck('title')->dump();
+        $product->take(2)->dump();
+        // $product->take(2)->toJson()->dump();// Call to a member function dump() on string
+        // dd($collect->toJson());// 也可以转化
+        $res = $product->pluck('title')->implode(' & ');// 用 逗号分隔
+        // dd($res);
+        $arrRes = $product->pluck('title')->toArray();// 
+        $res = implode($arrRes);// 如果没有传入分隔符分隔符是空
+        $res = implode(' * ', $arrRes);
+        // dd($res);
+        // dd($product->toJson());
+        // dd($collect);
+
+
+        // 聚合函数
+        $datas = Product::all()->pluck('price');
+        // $aggre = $datas->count();
+        // $aggre = $datas->sum();
+        // $aggre = $datas->average();
+        // $aggre = $datas->max();
+        $aggre = $datas->min();
+        // dd($aggre);
+
+        // 查找判断
+        $colRes = collect([
+            'v1',
+            'v2',
+            'v3',
+        ])
+        // ->contains('v3');
+        // ->contains('v4');
+        // ->diff(['v2', 'v3','v4']);// 输出 参数数组里不存在与diff数组里的数据数组 ['v1' ]
+        // 注意 集合不能empty判断数组是否为空 
+        // ->has('k1');
+        ->isEmpty();
+        // dd(empty(collect([])));// false
+
+
+        // 对查询出的集合 像查询构造器一样查询
+        $datas = Product::all();
+        // $colRes = $datas->where('id', 3);
+        $colRes = $datas->each(function($item) {
+            var_dump($item->id);
+            var_dump($item->title);
+            // var_dump('</br>');
+        });
+        // $colRes = $datas->map(function($item) {
+        //     return $item->id; 
+        // });
+        // $colRes = $datas->sortBy('price')->dd();// 对 对象数组里的数据进行排序
+        // $colRes = $datas->sortByDesc('price')->dd();
+        // $colRes = $datas->sortByDesc(function($item) {
+        //     return $item->price; 
+        // })->dd();
+        // dd($colRes);
+
+        // 元素数组里的某个对象 作键 排序 
+        $colRes = $datas->keyBy('id');
+        // dd($datas->toArray(), $colRes->toArray());
+        $colRes = $datas->groupBy('category_id');
+
+        $colRes = $datas->filter(function($item) {
+            return $item->id > 3; 
+        })
+        // ->dd()
+        ;
+        // array:3 [集合数组 ]
+        // dd($datas, $colRes);
+
+        // 对数组本身进行操作 
+        $colObj = collect([
+           'k1' => 'v1',
+           'k3' => 'v3',
+           'k2' => 'v2',
+        ]);
+        $colObjRes = $colObj->flip()->toArray();// 翻转 键值
+        $colObjRes = $colObj->reverse()->toArray();// 倒序
+        // dd($colObjRes);
+
+        // 笛卡尔积 组合2个数组的数据 所有可能性
+        $colObj = collect([
+            'k1',
+            'k3',
+            'k2',
+         ])->crossJoin([
+            'v1',
+            'v3',
+            'v2',
+         ])->dd();
+        // dd($colObjRes);
+
+        $collect = collect([6, 5, 1, 2, 3]);
+        $colRes = $collect->sort()->toArray();// 升降序
+        $colRes = $collect->sortDesc()->toArray();// 升降序
+        // dd($colRes);
+
+
+        return 'zyb';// 
+    }
+    // 3-15 门面是用来方便我们调用laravel一些方法的功能组件 提供一种新的调用路口 
+    function cache() {
+        Cache::put('key1', 'val1', 10);
+        Cache::put('key2', 'val2');
+        Cache::put('key3', 'val3', now()->addMinutes(1));
+        $res1 = Cache::get('key1');
+        $res2 = Cache::get('key2');
+        $res3 = Cache::get('key3');
+        // dd($res1, $res2, $res3);
+
+        // 如果key存在 则存储失败
+        $res1 = Cache::add('key1', 'had', 10);// 存在 false 不存在 true 
+        $res2 = Cache::add('key4', 'had', 10);
+        
+        // 没有过期时间 但是 缓存一般需要设置过期时间 
+        // $res3 = Cache::forever('key5', 'val5');// true 
+        $res3 = Cache::forget('key5');// false
+
+        // $res3 = Cache::add('key5', '', 0);
+        $res3 = Cache::get('key5');
+        $res3 = Cache::has('key5');
+
+
+        // 计数
+        Cache::put('key5', '', 6);
+        $res3 = Cache::increment('key5', 1);
+        $res3 = Cache::increment('key5', 1);
+        $res3 = Cache::get('key5');
+
+        // 获取并删除
+        $res3 = Cache::forever('key5', 'pull');
+        $res3 = Cache::pull('key5');
+
+
+        // 获取参数 缓存失效 自动获取数据
+        $res3 = Cache::remember('key5', 60, function ()
+        {
+            return ['zybo']; 
+        });
+
+        dd($res1, $res2, $res3);
+
+
+        return 'cache';// 
+    }
+
+
 }

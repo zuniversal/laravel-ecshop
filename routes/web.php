@@ -91,5 +91,7 @@ Route::any('/learn/getUrl',  function () {
 
 Route::any('/learn/dbTest', 'LearnController@dbTest');// 
 Route::any('/learn/modelUse', 'LearnController@modelUse');// 
+Route::any('/learn/collection', 'LearnController@collection');// 
+Route::any('/learn/cache', 'LearnController@cache');// 
 
 
