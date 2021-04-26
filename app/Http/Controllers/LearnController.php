@@ -504,5 +504,10 @@ class LearnController extends Controller
         return 'cache';// 
     }
 
+    // 3-18
+    function facade() {
+        \App\Facades\Product::getProduct(1);
+        return 'facade';// 
+    }
 
 }
