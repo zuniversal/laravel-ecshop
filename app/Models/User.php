@@ -10,6 +10,9 @@ class User extends Authenticatable
 {
     use Notifiable;
 
+    // 6-2 不然会自动加上复数  litemall_users
+    protected $table = 'user';
+
     /**
      * The attributes that are mass assignable.
      *

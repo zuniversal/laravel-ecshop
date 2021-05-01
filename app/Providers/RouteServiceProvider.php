@@ -49,6 +49,7 @@ class RouteServiceProvider extends ServiceProvider
 
         // 3-3
         // $this->mapAdminRoutes();
+        $this->mapWxRoutes();
     }
     // 3-3
     protected function mapAdminRoutes()
@@ -86,5 +87,12 @@ class RouteServiceProvider extends ServiceProvider
             ->middleware('api')
             ->namespace($this->namespace)
             ->group(base_path('routes/api.php'));
+    }
+    // 6-1 添加wx路由
+    protected function mapWxRoutes()
+    {
+        Route::prefix('wx')// 访问的路由前缀
+            ->namespace($this->namespace.'\Wx')
+            ->group(base_path('routes/wx.php'));
     }
 }
