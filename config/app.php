@@ -175,6 +175,23 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        // 5-4
+        // Leonis\Notifications\EasySms\EasySmsChannelServiceProvider::class,
+        // 运行如下命令  把 组件的配置文件导拷贝到 config 底下  会创建一个 easysms.php 文件
+        // php artisan vendor:publish --provider='Leonis\Notifications\EasySms\EasySmsChannelServiceProvider,' 
+        // 运行会报错 Unable to locate publishable resources.
+        // 解决 直接输入  php artisan vendor:publish  会让我们选择一个 provider 输入编号即可拷贝配置文件
+
+
+        // 在阿里云的控制条页面直接搜索短信服务  点击头像的访问控制 然后点击 用户 创建一个可以发送短信的用户  输入登陆和显示名称 然后勾选上编程 访问 
+        // 确认后 点击用户 设置 添加权限 搜索 短信 勾选上2个短信服务 然后确定 
+
+        // 拷贝文档的配置 到 easytsms.php
+
+        // 也可以搜索下 notify'相关的命令 php artisan list | grep notify
+        // php artisan make:notification VertificationCode 会在 app根目录下创建一个Notifications 的目录及对应的文件 
+
+
     ],
 
     /*
