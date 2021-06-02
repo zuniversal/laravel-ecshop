@@ -13,6 +13,10 @@ class User extends Authenticatable
     // 6-2 不然会自动加上复数  litemall_users
     protected $table = 'user';
 
+    // 6-3 覆写时间戳字段
+    public const CREATED_AT = 'add_time';
+    public const UPDATED_AT = 'update_time';
+
     /**
      * The attributes that are mass assignable.
      *

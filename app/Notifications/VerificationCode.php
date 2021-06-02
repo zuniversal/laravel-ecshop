@@ -54,7 +54,7 @@ class VerificationCode extends Notification
 
     }
     public function toEasySms($notifiable) {//信搜索息 
-        var_dump('toEasySms');// 
+        // var_dump('toEasySms');// 
         return (new EasySmsMessage())         
         // ->setContent('您的验证阿妈是：6666') // 因为使用的是模板 不使用 内容设置 
         ->setTemplate('SMS_2145004')

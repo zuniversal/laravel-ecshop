@@ -85,53 +85,82 @@ class AuthController extends Controller
     }
     
     public function regCaptcha(Request $request) 
-    {// 
-        $mobile = $request->input('mobile');
+    {
+        // 获取手机号
+        $mobile = $request->input('mobile');        var_dump('$mobile'.$mobile);// 
+        $mobile = '15160208606';
         if (empty($mobile)) {
-            // return ['errno' => 401, 'errmsg' => '参数不对', ];//
+            return ['errno' => 401, 'errmsg' => '参数不对', ];//
         }
+
         $validator = Validator::make([
             'mobile' => $mobile,
         ], [
             'mobile' => 'regex:/^1[0-9]{10}$/',
         ]);
 
-        var_dump($mobile);// 
+        // // Object of class Illuminate\Validation\Validator could not be converted to string
+        // var_dump('$mobile'.$validator);// 
         var_dump($validator->fails());// 
         if ($validator->fails()) {
             // return ['errno' => 707, 'errmsg' => '手机号格式不正确', ];// 
         }
 
-        var_dump($mobile);// 
         $user = (new UserServices())->getByMobile($mobile);
-        var_dump($user);// 
+        var_dump('===='.$user.'++++');// 
         if (!is_null($user)) {
             return ['errno' => 705, 'errmsg' => '手机号已注册', ];// 
         }
 
+
+        // 5-5
         $code = random_int(100000, 999999);
         var_dump($code);// 
+        
+        // 防刷验证 1分钟只能请求一次 当天只能请求10次 
         $lock = Cache::add('register_captcha_lock_'.$mobile, 1, 60);
+        var_dump($lock ? '$lock' : 'xxx');// 
         if (!$lock) {
             // return ['errno' => 702, 'errmsg' => '验证码未超时1分钟，不能发送', ];// 
         }
-        $countKey = 'register_captcha_count_'.$mobile; 
-        if (Cache::has($countKey)) {
-            $count = Cache::increment($countKey);
-            if ($count > 10) {
-                // return ['errno' => 702, 'errmsg' => $count.'验证码未超时1分钟，不能发送', ];// 
-            }
-        } else {
-            Cache::put($countKey, 1, Carbon::tomorrow()->diffInSeconds(now()));
-        } 
-        var_dump('$count'.$count);// 
+        
+        // $isPass = (new UserServices())->checkCaptcha($mobile, $code);
+        // var_dump($isPass ? 'aaa' : 'bbb');// 
+        // if (!$isPass) {
+        //     // return ['errno' => 703, 'errmsg' => '验证码当天发送不能超过10次', ];// 
+        // }
+
+        // $countKey = 'register_captcha_count_'.$mobile; 
+        // if (Cache::has($countKey)) {
+        //     $count = Cache::increment($countKey);
+        //     if ($count > 10) {
+        //         // return ['errno' => 702, 'errmsg' => $count.'验证码未超时1分钟，不能发送', ];// 
+        //     }
+        // } else {
+        //     Cache::put($countKey, 1, Carbon::tomorrow()->diffInSeconds(now()));
+        // } 
+        // var_dump('$count'.$count);// 
+
+        // 5-5
+        $isPass = (new UserServices())->checkMobileSendCaptchaCount($mobile);
+        var_dump('checkMobileSendCaptchaCount'.$isPass);// 
+        if (!$isPass) {
+            return ['errno' => 703, 'errmsg' => '验证码当天发送不能超过10次', ];// 
+        }
+        
         Cache::put('register_captcha_'.$mobile, $code, 600);
 
-        // 5-4
-        Notification::route(
-            EasySmsChannel::class,
-            new PhoneNumber(15160208606, 86)
-        )->notify(new VerificationCode(337133));
+        // // 5-4
+        // Notification::route(
+        //     EasySmsChannel::class,
+        //     new PhoneNumber(15160208606, 86)
+        // )->notify(new VerificationCode(337133));
+
+        // 5-5 保存手机号和验证码的关系 随机生成6位验证码
+        $code = (new UserServices())->setCaptcha($mobile);// 
+        var_dump('  ===================== '.$code);// 
+
+        (new UserServices())->sendCaptchaMsg($mobile, $code);
         
         return ['errno' => 0, 'errmsg' => '成功', 'data' => null, ];// 
     }
