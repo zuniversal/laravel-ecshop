@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Notification;
 use Leonis\Notifications\EasySms\Channels\EasySmsChannel;
 use Overtrue\EasySms\PhoneNumber;
 use App\Notifications\VerificationCode;
+use Illuminate\Support\Facades\Auth;
 
 // 6-1
 // class AuthController extends Controller
@@ -236,7 +237,7 @@ class AuthController extends WxController
         // 因为数据库里定义的密码字段刚好就是 password 所以跨域如下使用
         $isPass = Hash::check($password, $user->getAuthPassword());
         if (!$isPass) {
-            // return $this->fail(CodeResponse::AUTH_INVALID_ACCOUNT);
+            return $this->fail(CodeResponse::AUTH_INVALID_ACCOUNT);
         }
         
         // 更新登录信息
@@ -251,7 +252,12 @@ class AuthController extends WxController
         // composer require tymon/jwt-auth -vvv
         // php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\LaravelServiceProvider"
         // 会生成文件  laravel/config/jwt.php
-        $token = '';
+        // php artisan jwt:secret  会在 .env 生成密钥 JWT_SECRET
+
+        // 去 Models/User.php  实现 JWTSubject
+        // 配置 auth.php 
+        $token = Auth::guard('wx')// 默认配置的就是 wx 所以 wx 不写也是ok的
+        ->login($user);
 
         // 组装数据并返回
         return $this->success([

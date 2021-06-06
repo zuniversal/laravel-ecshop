@@ -14,7 +14,8 @@ return [
     */
 
     'defaults' => [
-        'guard' => 'web',
+        // 'guard' => 'web',
+        'guard' => 'wx', // 5-10 路由组 守卫者
         'passwords' => 'users',
     ],
 
@@ -46,6 +47,12 @@ return [
             'provider' => 'users',
             'hash' => false,
         ],
+
+        // 5-10
+        'wx' => [
+            'driver' => 'jwt',
+            'provider' => 'users',
+        ],
     ],
 
     /*
@@ -68,7 +75,9 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\User::class,
+            // 'model' => App\User::class,
+            // 5-10
+            'model' => App\Models\User::class,
         ],
 
         // 'users' => [
