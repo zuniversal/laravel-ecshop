@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\CodeResponse;
+use App\Exceptions\BussniessException;
 use App\Models\User;
 use App\Notifications\VerificationCode;
 use Illuminate\Support\Facades\Cache;
@@ -75,7 +77,9 @@ class UserServices
             var_dump('通过了');// 
             Cache::forget($key);
             return true;
-        }
+        } else {//5-7
+            throw new BussniessException(CodeResponse::AUTH_CAPTCHA_UNMATCH);
+        } 
         return $isPass; 
     }
     public function setCaptcha(string $mobile) {//  

@@ -13,7 +13,8 @@ class Handler extends ExceptionHandler
      * @var array
      */
     protected $dontReport = [
-        //
+        // 5-7 作用 捕获异常的申报 不会调用 report 函数 - 记录错误日志 但是我们抛出的业务异常不需要日志
+        BussniessException::class,
     ];
 
     /**
@@ -48,8 +49,16 @@ class Handler extends ExceptionHandler
      *
      * @throws \Throwable
      */
+
+    // 5-7 对异常返回格式做一些格式化 统一处理 
     public function render($request, Throwable $exception)
     {
+        if ($exception instanceof BussniessException) {
+            return response()->json([
+                'errno' => $exception->getCode(),
+                'errmsg' => $exception->getMessage(),
+            ]);
+        }
         return parent::render($request, $exception);
     }
 }
