@@ -37,13 +37,12 @@ class AuthController extends WxController
     public function register(Request $request)
     {
         // return 'register AuthController';
-        $username = $request->input('username');
-        $username = 'user8';
-        $password = $request->input('password');
-        $username = '1';
-        $mobile = $request->input('mobile');
-        $mobile = 15160208607;
+        $username = $request->input('username') ?? 'aaa';
+        $password = $request->input('password') ?? 1;
+        $mobile = $request->input('mobile') ?? 15160208607;
         $code = $request->input('code');
+        var_dump($username);//
+        var_dump($password);//
 
         // 验证参数是否为空
         if (empty($username) || empty($password) || empty($mobile) || empty($code)) {
@@ -51,7 +50,6 @@ class AuthController extends WxController
             // return ['errno' => 401, 'errmsg' => '参数不对', ];// 
         }
 
-        // var_dump($username);//
         // 验证用户是否存在 
         // $user = (new UserServices())->getByUserName($username);
         // $user = $this->userService->getByUserName($username);// 5-8
@@ -120,9 +118,8 @@ class AuthController extends WxController
     public function regCaptcha(Request $request) 
     {
         // 获取手机号
-        $mobile = $request->input('mobile');        
+        $mobile = $request->input('mobile') ??60208607;    
         var_dump('$mobile'.$mobile);// 
-        $mobile = '15160208606';
         if (empty($mobile)) {
             return $this->fail(CodeResponse::PARAM_ILLEGAL);// 5-7 
             return ['errno' => 401, 'errmsg' => '参数不对', ];//
@@ -217,9 +214,8 @@ class AuthController extends WxController
     {
         // return 'login AuthController';
         // 获取账号密码
-        $username = $request->input('username');
-        $username = 'user8';
-        $password = $request->input('password');
+        $username = $request->input('username') ?? 'aaa';
+        $password = $request->input('password') ?? 1;
         // $password = 15160208607;
         // var_dump($username);// 
         // var_dump($password);// 
@@ -251,6 +247,10 @@ class AuthController extends WxController
         }
 
         // 获取token
+        // 经常用于分布式系统身份认证的场景
+        // composer require tymon/jwt-auth -vvv
+        // php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\LaravelServiceProvider"
+        // 会生成文件  laravel/config/jwt.php
         $token = '';
 
         // 组装数据并返回
