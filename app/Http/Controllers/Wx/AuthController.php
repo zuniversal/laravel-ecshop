@@ -40,6 +40,7 @@ class AuthController extends WxController
         $username = $request->input('username');
         $username = 'user8';
         $password = $request->input('password');
+        $username = '1';
         $mobile = $request->input('mobile');
         $mobile = 15160208607;
         $code = $request->input('code');
@@ -211,4 +212,55 @@ class AuthController extends WxController
         return ['errno' => 0, 'errmsg' => '成功', 'data' => null, ];// 
     }
 
+    // 5-10
+    public function login(Request $request)
+    {
+        // return 'login AuthController';
+        // 获取账号密码
+        $username = $request->input('username');
+        $username = 'user8';
+        $password = $request->input('password');
+        // $password = 15160208607;
+        // var_dump($username);// 
+        // var_dump($password);// 
+
+        // 数据验证
+        if (empty($username) || empty($password)) {
+            return $this->fail(CodeResponse::PARAM_ILLEGAL);
+        }
+
+        // 验证账号是否操作
+        $user = UserServices::getInstance()->getByUserName($username);// 5-8
+        // dump($user);
+        if (is_null($user)) {
+            return $this->fail(CodeResponse::AUTH_INVALID_ACCOUNT);
+        }
+
+        // 对密码进行验证 
+        // 因为数据库里定义的密码字段刚好就是 password 所以跨域如下使用
+        $isPass = Hash::check($password, $user->getAuthPassword());
+        if (!$isPass) {
+            // return $this->fail(CodeResponse::AUTH_INVALID_ACCOUNT);
+        }
+        
+        // 更新登录信息
+        $user->last_login_time = now()->toDateTimeString();
+        $user->last_login_ip = $request->getClientIp();
+        if (!$user->save()) {
+            return $this->fail(CodeResponse::UPDATED_FAIL);
+        }
+
+        // 获取token
+        $token = '';
+
+        // 组装数据并返回
+        return $this->success([
+            'token' => $token, 
+            'userInfo' => [
+                'nickname' => $username,
+                'avatarUrl' => $user->avatar,
+            ],
+        ]);
+    }
+    
 }

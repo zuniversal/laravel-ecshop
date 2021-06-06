@@ -8,6 +8,7 @@ class CodeResponse
     const SUCCESS = [0, '成功'];
     const FAIL = [-1, '错误'];
     const PARAM_ILLEGAL = [401, '参数不合法'];
+    const UPDATED_FAIL = [505, '更新数据失败'];// 5-10
 
     // 业务返回码
     const AUTH_INVALID_ACCOUNT = [700, ''];

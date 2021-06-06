@@ -16,7 +16,7 @@ class BaseServices
     protected static $instance;
     
     public static function getInstance() {// 
-        var_dump('  BaseServicesBaseServices ');// 
+        // var_dump('  BaseServicesBaseServices ');// 
 
         // 在 UserSerivces 里 不能调用  private static $instance;
         // Cannot access property App\Services\UserServices::$instance

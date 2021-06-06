@@ -86,6 +86,12 @@ class UserServices extends BaseServices
     }
 
     public function checkCaptcha(string $mobile, string $code) {// 
+        // 5-9 
+        if (!aoo()->environment('production')) {
+            return true;// 
+        }
+
+
         $key = 'register_captcha_'.$mobile;
         // return $code === Cache::get($key); 
         // 验证完短信验证码 需要失效 否则会有风险 
