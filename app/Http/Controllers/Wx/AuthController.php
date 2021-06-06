@@ -27,6 +27,13 @@ use App\Notifications\VerificationCode;
 // class AuthController extends Controller
 class AuthController extends WxController
 {
+    // 5-8 频繁的实例化和销毁 很耗性能 
+    private $userService;
+    // public function __construct()
+    // {
+    //     $this->userService = new UserServices();
+    // }
+
     public function register(Request $request)
     {
         // return 'register AuthController';
@@ -45,7 +52,9 @@ class AuthController extends WxController
 
         // var_dump($username);//
         // 验证用户是否存在 
-        $user = (new UserServices())->getByUserName($username);
+        // $user = (new UserServices())->getByUserName($username);
+        // $user = $this->userService->getByUserName($username);// 5-8
+        $user = UserServices::getInstance()->getByUserName($username);// 5-8
         // dump($user);// 没有的话 查询结果是 null 
         if (!is_null($user)) {
             return $this->fail(CodeResponse::AUTH_NAME_REGISTERED);// 5-7 
@@ -65,7 +74,9 @@ class AuthController extends WxController
         //     return ['errno' => 707, 'errmsg' => '手机号格式不正确', ];// 
         // }
 
-        $user = (new UserServices())->getByMobile($mobile);
+        // $user = (new UserServices())->getByMobile($mobile);
+        // $user = $this->userService->getByMobile($mobile);// 5-8
+        $user = UserServices::getInstance()->getByMobile($mobile);// 5-8
         // dump($user);// 
         if (!is_null($user)) {
             return $this->fail(CodeResponse::AUTH_MOBILE_REGISTERED);// 5-7 
@@ -131,7 +142,9 @@ class AuthController extends WxController
         }  
 
 
-        $user = (new UserServices())->getByMobile($mobile);
+        // $user = (new UserServices())->getByMobile($mobile);
+        // $user = $this->userService->getByMobile($mobile);// 5-8
+        $user = UserServices::getInstance()->getByMobile($mobile);// 5-8
         var_dump('===='.(is_null($user) ? 111 : 222).'++++');// 
         if (!is_null($user)) {
             // return $this->fail(CodeResponse::AUTH_MOBILE_REGISTERED);// 5-7 
@@ -169,7 +182,9 @@ class AuthController extends WxController
         // var_dump('$count'.$count);// 
 
         // 5-5
-        $isPass = (new UserServices())->checkMobileSendCaptchaCount($mobile);
+        // $isPass = (new UserServices())->checkMobileSendCaptchaCount($mobile);
+        // $isPass = $this->userService->checkMobileSendCaptchaCount($mobile);// 5-8
+        $isPass = UserServices::getInstance()->checkMobileSendCaptchaCount($mobile);// 5-8
         var_dump('checkMobileSendCaptchaCount'.($isPass ? 111 : 222).'++++');// 
         if (!$isPass) {
             // return $this->fail(CodeResponse::AUTH_CAPTCHA_FREQUENCY, '验证码当天发送不能超过10次');// 5-7 
@@ -185,10 +200,13 @@ class AuthController extends WxController
         // )->notify(new VerificationCode(337133));
 
         // 5-5 保存手机号和验证码的关系 随机生成6位验证码
-        $code = (new UserServices())->setCaptcha($mobile);// 
+        // $code = (new UserServices())->setCaptcha($mobile);// 
+        $code = UserServices::getInstance()->setCaptcha($mobile);// // 5-8
         var_dump('  ===================== '.$code);// 
 
-        (new UserServices())->sendCaptchaMsg($mobile, $code);
+        // (new UserServices())->sendCaptchaMsg($mobile, $code);
+        // $this->userService->sendCaptchaMsg($mobile, $code);// 5-8
+        UserServices::getInstance()->sendCaptchaMsg($mobile, $code);// 5-8
         
         return ['errno' => 0, 'errmsg' => '成功', 'data' => null, ];// 
     }

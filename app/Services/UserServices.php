@@ -12,10 +12,35 @@ use Illuminate\Support\carbon;
 use Illuminate\Support\Facades\Notification;
 use Leonis\Notifications\EasySms\Channels\EasySmsChannel;
 use Overtrue\EasySms\PhoneNumber;
+use App\Services\BaseServices;
 
 // 6-1
-class UserServices 
+// class UserServices 
+class UserServices extends BaseServices
 {
+
+    // 5-8 单例模式 3个私有2个共有1个静态 私有变量、函数   公有的获取单例的方法 静态的实例变量 静态的获取单例的方法
+    // 静态方法 变量 又被叫 类方法 类变量 是跟随类被加载到内存中 只会加载一次
+    // 但是我们有很多类 每次都这么做不行 可以放到基类里进行  
+
+    // private static $instance;
+    // public static function getInstance() {// 
+    //     var_dump('  UserServicesUserServices ');// 
+    //     if (self::$instance instanceof self) {
+    //         return self::$instance;// 返回当前类的实例
+    //     }
+    //     self::$instance = new self();
+    //     return self::$instance;
+    // }
+    // // 使用 new 关键字 使得其它地方不能实例化 只能使用单例调用
+    // private function __construct()
+    // {
+    // }
+    // private function __clone()
+    // {
+    // }
+
+
     // 根据用户名获取用户
     public function getByUserName($username)
     {
