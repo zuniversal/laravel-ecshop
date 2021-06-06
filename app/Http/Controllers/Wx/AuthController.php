@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Wx;
 
+use App\CodeResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Wx\WxController;
 use App\Http\Middleware\Benchmark;
 use App\Services\UserServices;
 use App\Models\Product;
@@ -22,24 +24,31 @@ use Overtrue\EasySms\PhoneNumber;
 use App\Notifications\VerificationCode;
 
 // 6-1
-class AuthController extends Controller
+// class AuthController extends Controller
+class AuthController extends WxController
 {
     public function register(Request $request)
     {
         // return 'register AuthController';
         $username = $request->input('username');
-        $username = 'user123';
+        $username = 'user8';
         $password = $request->input('password');
         $mobile = $request->input('mobile');
+        $mobile = 15160208607;
         $code = $request->input('code');
 
+        // 验证参数是否为空
         if (empty($username) || empty($password) || empty($mobile) || empty($code)) {
-            return ['errno' => 401, 'errmsg' => '参数不对', ];// 
+            // return $this->fail(CodeResponse::PARAM_ILLEGAL);// 5-7 
+            // return ['errno' => 401, 'errmsg' => '参数不对', ];// 
         }
 
+        // var_dump($username);//
+        // 验证用户是否存在 
         $user = (new UserServices())->getByUserName($username);
-        // dump($user);// 
+        // dump($user);// 没有的话 查询结果是 null 
         if (!is_null($user)) {
+            return $this->fail(CodeResponse::AUTH_NAME_REGISTERED);// 5-7 
             return ['errno' => 704, 'errmsg' => '用户名已注册', ];// 
         }
 
@@ -50,13 +59,16 @@ class AuthController extends Controller
         ]);
         // dump($validator->fails());// 
 
-        if ($validator->fails()) {
-            return ['errno' => 707, 'errmsg' => '手机号格式不正确', ];// 
-        }
+        // var_dump($mobile);// 
+        // if ($validator->fails()) {
+        //     return $this->fail(CodeResponse::AUTH_INVALID_MOBILE);// 5-7 
+        //     return ['errno' => 707, 'errmsg' => '手机号格式不正确', ];// 
+        // }
 
         $user = (new UserServices())->getByMobile($mobile);
         // dump($user);// 
         if (!is_null($user)) {
+            return $this->fail(CodeResponse::AUTH_MOBILE_REGISTERED);// 5-7 
             return ['errno' => 705, 'errmsg' => '手机号已注册', ];// 
         }
 
@@ -71,6 +83,15 @@ class AuthController extends Controller
         $user->last_login_time = Carbon::now()->toDateTimeString();
         $user->last_login_ip = $request->getClientIp();
         $user->save();
+        
+        // 5-6
+        return $this->success([
+            'token' => '', 
+            'userInfo' => [
+                'nickname' => $username,
+                'avatarUrl' => $user->avatar,
+            ],
+        ]);
 
         return [
             'errno' => 0, 'errmsg' => '成功', 
@@ -87,9 +108,11 @@ class AuthController extends Controller
     public function regCaptcha(Request $request) 
     {
         // 获取手机号
-        $mobile = $request->input('mobile');        var_dump('$mobile'.$mobile);// 
+        $mobile = $request->input('mobile');        
+        var_dump('$mobile'.$mobile);// 
         $mobile = '15160208606';
         if (empty($mobile)) {
+            return $this->fail(CodeResponse::PARAM_ILLEGAL);// 5-7 
             return ['errno' => 401, 'errmsg' => '参数不对', ];//
         }
 
@@ -103,13 +126,16 @@ class AuthController extends Controller
         // var_dump('$mobile'.$validator);// 
         var_dump($validator->fails());// 
         if ($validator->fails()) {
+            return $this->fail(CodeResponse::AUTH_INVALID_MOBILE);// 5-7 
             // return ['errno' => 707, 'errmsg' => '手机号格式不正确', ];// 
-        }
+        }  
+
 
         $user = (new UserServices())->getByMobile($mobile);
-        var_dump('===='.$user.'++++');// 
+        var_dump('===='.(is_null($user) ? 111 : 222).'++++');// 
         if (!is_null($user)) {
-            return ['errno' => 705, 'errmsg' => '手机号已注册', ];// 
+            // return $this->fail(CodeResponse::AUTH_MOBILE_REGISTERED);// 5-7 
+            // return ['errno' => 705, 'errmsg' => '手机号已注册', ];// 
         }
 
 
@@ -119,8 +145,9 @@ class AuthController extends Controller
         
         // 防刷验证 1分钟只能请求一次 当天只能请求10次 
         $lock = Cache::add('register_captcha_lock_'.$mobile, 1, 60);
-        var_dump($lock ? '$lock' : 'xxx');// 
+        var_dump($lock ? '$locksss' : 'xxx');// 
         if (!$lock) {
+            // return $this->fail(CodeResponse::AUTH_CAPTCHA_FREQUENCY);// 5-7 
             // return ['errno' => 702, 'errmsg' => '验证码未超时1分钟，不能发送', ];// 
         }
         
@@ -143,9 +170,10 @@ class AuthController extends Controller
 
         // 5-5
         $isPass = (new UserServices())->checkMobileSendCaptchaCount($mobile);
-        var_dump('checkMobileSendCaptchaCount'.$isPass);// 
+        var_dump('checkMobileSendCaptchaCount'.($isPass ? 111 : 222).'++++');// 
         if (!$isPass) {
-            return ['errno' => 703, 'errmsg' => '验证码当天发送不能超过10次', ];// 
+            // return $this->fail(CodeResponse::AUTH_CAPTCHA_FREQUENCY, '验证码当天发送不能超过10次');// 5-7 
+            // return ['errno' => 703, 'errmsg' => '验证码当天发送不能超过10次', ];// 
         }
         
         Cache::put('register_captcha_'.$mobile, $code, 600);
