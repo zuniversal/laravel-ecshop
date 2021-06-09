@@ -7,6 +7,23 @@ use App\Http\Controllers\Controller;
 
 class WxController extends Controller
 {
+    // 5-13 所有接口都需要该中间件  提取到基类 解决重复编写
+    // only 适合 大部分不需要验证的接口 except 相反
+
+    protected $only;
+    protected $except;
+    public function __construct() {// 
+        $option = [];
+        if (!is_null($this->only)) {
+            $option['only'] = $this->only;
+        }
+        if (!is_null($this->except)) {
+            $option['except'] = $this->except;
+        }
+        $this->middleware('auth:wx', $option);
+    }
+
+
     // protected function codeReturn($errno, $errmsg, $data = null) {// 
     protected function codeReturn(array $codeResponse, $data = null, $info = '') {// 
         list(

@@ -51,7 +51,12 @@ class User extends Authenticatable implements JWTSubject
     }
     // 存放自定义信息到 token
     public function getJWTCustomClaims() {// 
-        return [];        
+        // return [];  
+        // 5-13    
+        return [
+            'iss' => env('JWT_ISSUER'),
+            'userId' => $this->getKey(),
+        ];        
     }
 
 }

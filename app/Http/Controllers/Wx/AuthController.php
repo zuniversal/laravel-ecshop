@@ -269,4 +269,23 @@ class AuthController extends WxController
         ]);
     }
     
+    // 5-13 
+    // public function __construct() {// 
+    //     $this->middleware('auth:wx', [
+    //         'only' => ['user'],
+    //         // 'except' => [''],
+    //     ]);
+    // }
+
+
+    protected $only = ['user'];
+    // 直接访问会报错 Route [login] not defined.  因为 我们在 
+    // laravel/app/Http/Middleware/Authenticate.php 定义 return route('login');
+
+    // get 需要带上 token 参数 才能访问接口  http://laravel.test/wx/auth/user?token= 
+    public function user() {// 
+        $user = Auth::guard('wx')->user();
+        // var_dump($user);// 
+        return $this->success($user); 
+    }
 }

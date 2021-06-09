@@ -1,5 +1,8 @@
 <?php
 
+// 5-13 jwt 把基础的用户数据保存到客户端 服务器不报错 保证服务器是无状态的 方便进行水平扩展 提高服务器的扩展性
+// 前后端分离的一般都是有 jwt 方案 因为天然支持跨域  甚至2个服务之间的身份认证
+
 /*
  * This file is part of jwt-auth.
  *
@@ -120,7 +123,7 @@ return [
     |
     */
 
-    'refresh_ttl' => env('JWT_REFRESH_TTL', 20160),
+    'refresh_ttl' => env('JWT_REFRESH_TTL', 20160),// 5-12 刷新时间 默认是2周 
 
     /*
     |--------------------------------------------------------------------------
@@ -147,7 +150,7 @@ return [
     |
     */
 
-    'required_claims' => [
+    'required_claims' => [// payload 里的信息 
         'iss',
         'iat',
         'exp',
@@ -173,6 +176,8 @@ return [
         // 'foo',
         // 'bar',
     ],
+
+    // prv 是用来区分模型对象 比如 普通用户 管理员
 
     /*
     |--------------------------------------------------------------------------
@@ -208,7 +213,7 @@ return [
     |
     */
 
-    'leeway' => env('JWT_LEEWAY', 0),
+    'leeway' => env('JWT_LEEWAY', 0),// 缓存时间 解决 当请求不同服务器过期时间到部分请求通过 部分没有 防止一些时钟差异导致某些问题
 
     /*
     |--------------------------------------------------------------------------
@@ -220,7 +225,7 @@ return [
     |
     */
 
-    'blacklist_enabled' => env('JWT_BLACKLIST_ENABLED', true),
+    'blacklist_enabled' => env('JWT_BLACKLIST_ENABLED', true),// 退出登录设置为失效 就需要开启
 
     /*
     | -------------------------------------------------------------------------
@@ -235,7 +240,7 @@ return [
     |
     */
 
-    'blacklist_grace_period' => env('JWT_BLACKLIST_GRACE_PERIOD', 0),
+    'blacklist_grace_period' => env('JWT_BLACKLIST_GRACE_PERIOD', 0),// 缓冲时间 加入黑名单可能并发过来好多请求 因为是分布式 
 
     /*
     |--------------------------------------------------------------------------
@@ -253,7 +258,7 @@ return [
     |
     */
 
-    'decrypt_cookies' => false,
+    'decrypt_cookies' => false,// 默认情况下laravel对cookie是加密的 如果使用cookie传递 需要设置为true 使用进行加密
 
     /*
     |--------------------------------------------------------------------------
@@ -275,7 +280,7 @@ return [
         |
         */
 
-        'jwt' => Tymon\JWTAuth\Providers\JWT\Lcobucci::class,
+        'jwt' => Tymon\JWTAuth\Providers\JWT\Lcobucci::class,// 生成jwt token  的服务
 
         /*
         |--------------------------------------------------------------------------
@@ -286,7 +291,7 @@ return [
         |
         */
 
-        'auth' => Tymon\JWTAuth\Providers\Auth\Illuminate::class,
+        'auth' => Tymon\JWTAuth\Providers\Auth\Illuminate::class,// 认证服务 即 用户带上token来请求 解析token 识别用户身份
 
         /*
         |--------------------------------------------------------------------------
@@ -297,7 +302,7 @@ return [
         |
         */
 
-        'storage' => Tymon\JWTAuth\Providers\Storage\Illuminate::class,
+        'storage' => Tymon\JWTAuth\Providers\Storage\Illuminate::class,// 存储服务 把 token 存储起来
 
     ],
 
