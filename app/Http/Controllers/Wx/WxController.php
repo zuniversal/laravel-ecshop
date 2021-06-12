@@ -53,4 +53,17 @@ class WxController extends Controller
     protected function fail(array $codeResponse = CodeResponse::FAIL, $info = '') {
         return $this->codeReturn($codeResponse, null, $info);
     }
+
+    // 5-14
+    protected function failOrSuccess( 
+        $isSuccess,
+        array $codeResponse = CodeResponse::FAIL,
+            $data = null,
+            $info = ''
+    ) {
+        if ($isSuccess) {
+            return $this->success($data); 
+        }
+        return $this->fail($codeResponse, $info); 
+    }
 }

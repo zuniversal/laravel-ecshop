@@ -87,7 +87,7 @@ class UserServices extends BaseServices
 
     public function checkCaptcha(string $mobile, string $code) {// 
         // 5-9 
-        if (!aoo()->environment('production')) {
+        if (!app()->environment('production')) {
             return true;// 
         }
 

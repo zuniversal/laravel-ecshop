@@ -24,10 +24,100 @@ use Overtrue\EasySms\PhoneNumber;
 use App\Notifications\VerificationCode;
 use Illuminate\Support\Facades\Auth;
 
+const DEF_MOBILE = 15160208607;
+const DEF_PASS = 1;
+
+
+
 // 6-1
 // class AuthController extends Controller
 class AuthController extends WxController
 {
+    // 5-13
+    protected $only = [
+        // 'user',
+        'info',
+        // 5-14
+        'profile',
+    ];
+    // 直接访问会报错 Route [login] not defined.  因为 我们在 
+    // laravel/app/Http/Middleware/Authenticate.php 定义 return route('login');
+
+    // get 需要带上 token 参数 才能访问接口  http://laravel.test/wx/auth/user?token= 
+    // public function user() {// 
+        // 用户用户信息
+    public function info() {// 5-14
+        $user = Auth::guard('wx')->user();
+        // var_dump($user);// 
+        // return $this->success($user); 
+        // 5-14
+        return $this->success([
+            'nickName' => $user->nickname,
+            'avatar' => $user->avatar,
+            'gender' => $user->gender,
+            'mobile' => $user->mobile,
+            'password' => $user->password,
+        ]); 
+    }
+    // 5-14
+    public function logout() {// 
+        $user = Auth::guard('wx')->logout();
+        return $this->success(); 
+    }
+
+    // 密码重置
+    public function reset(Request $request) {
+        $password = $request->input('password') ?? DEF_PASS;
+        $mobile = $request->input('mobile') ?? DEF_MOBILE;
+        $code = $request->input('code') ?? 666;      
+        
+        if (empty($password) || empty($mobile) || empty($code)) {
+            // return $this->fail(CodeResponse::PARAM_ILLEGAL);
+        }
+
+        $isPass = UserServices::getInstance()->checkCaptcha($mobile, $code);
+        if (!$isPass) {
+            return $this->fail(CodeResponse::AUTH_CAPTCHA_FREQUENCY, '验证码当天发送不能超过10次');// 5-7 
+        }
+
+        $user = UserServices::getInstance()->getByMobile($mobile);
+        // dd($user);// 
+        // var_dump('===='.(is_null($user) ? 111 : 222).'++++');// 
+        if (is_null($user)) {
+            return $this->fail(CodeResponse::AUTH_MOBILE_UNREGISTERED);
+        }
+
+        $user->password = Hash::make($password);
+        $ret = $user->save();
+        
+        return $this->failOrSuccess($ret, CodeResponse::UPDATED_FAIL); 
+    }
+
+    // 用户信息修改
+    public function profile(Request $request) {
+        $user = $this->user();
+        $avatar = $request->input('avatar');
+        $gender = $request->input('gender');
+        $nickname = $request->input('nickname');
+        
+        if (!empty($password)) {
+            $user->avatar = $avatar;
+        }
+        if (!empty($gender)) {
+            $user->gender = $gender;
+        }
+        if (!empty($nickname)) {
+            $user->nickname = $nickname;
+        }
+        dd($user);// 
+        return  
+        $ret = $user->save();
+        
+        return $this->failOrSuccess($ret, CodeResponse::UPDATED_FAIL); 
+    }
+
+
+
     // 5-8 频繁的实例化和销毁 很耗性能 
     private $userService;
     // public function __construct()
@@ -39,8 +129,8 @@ class AuthController extends WxController
     {
         // return 'register AuthController';
         $username = $request->input('username') ?? 'aaa';
-        $password = $request->input('password') ?? 1;
-        $mobile = $request->input('mobile') ?? 15160208607;
+        $password = $request->input('password') ?? DEF_PASS;
+        $mobile = $request->input('mobile') ?? DEF_MOBILE;
         $code = $request->input('code');
         var_dump($username);//
         var_dump($password);//
@@ -216,8 +306,8 @@ class AuthController extends WxController
         // return 'login AuthController';
         // 获取账号密码
         $username = $request->input('username') ?? 'aaa';
-        $password = $request->input('password') ?? 1;
-        // $password = 15160208607;
+        $password = $request->input('password') ?? DEF_PASS;
+        // $password = DEF_MOBILE;
         // var_dump($username);// 
         // var_dump($password);// 
 
@@ -277,15 +367,4 @@ class AuthController extends WxController
     //     ]);
     // }
 
-
-    protected $only = ['user'];
-    // 直接访问会报错 Route [login] not defined.  因为 我们在 
-    // laravel/app/Http/Middleware/Authenticate.php 定义 return route('login');
-
-    // get 需要带上 token 参数 才能访问接口  http://laravel.test/wx/auth/user?token= 
-    public function user() {// 
-        $user = Auth::guard('wx')->user();
-        // var_dump($user);// 
-        return $this->success($user); 
-    }
 }
