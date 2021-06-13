@@ -2,6 +2,8 @@
 // 5-8  php artisan test 全部的测试都可以跑跑一遍 
 namespace App\Services;
 
+use App\Exceptions\BussniessException;
+
 // 单例模式 为类提供一种访问类唯一对象的方式 
 
 class BaseServices 
@@ -35,4 +37,8 @@ class BaseServices
     {
     }
 
+    // 5-15 频繁使用 简化编写
+    public function throwBussniessException(array $codeResponse) {// 
+        throw new BussniessException($codeResponse);
+    }
 }
