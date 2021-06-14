@@ -26,4 +26,5 @@ Route::any('address/detail', 'AddressController@detail'); // 收货地址详情
 Route::any('address/save', 'AddressController@save'); // 保存收货地址
 Route::any('address/delete', 'AddressController@delete'); // 保存收货地址
 
-
+Route::any('catalog/index', 'CatelogController@index'); // 分类目录全部分类数据接口
+Route::any('catalog/current', 'CatelogController@current'); // 分类目录当前分类数据接口
