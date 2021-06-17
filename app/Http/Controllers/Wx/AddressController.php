@@ -6,10 +6,10 @@ use App\CodeResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Wx\WxController;
 use App\Http\Middleware\Benchmark;
-use App\Models\Address;
-use App\Services\UserServices;
+use App\Models\User\Address;
+use App\Services\User\UserServices;
 use App\Models\Product;
-use App\Models\User;
+use App\Models\User\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Query\Builder;
@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Notification;
 use Overtrue\EasySms\PhoneNumber;
 use App\Notifications\VerificationCode;
-use App\Services\AddressServices;
+use App\Service\Users\AddressServices;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -43,15 +43,17 @@ class AddressController extends WxController
             // ->getAddressListByUserId($this->user()->id);
             ->getAddressListByUserId(DEF_ID);
         // dd($list);// 
-        $list = $list->map(function(Address $address) {
-            $address = $address->toArray();
-            $item = [];
-            foreach ($address as $key => $value) {
-                $key = lcfirst(Str::studly($key));
-                $item[$key] = $value;
-            }
-            return $item;
-        });
+
+        // 6-3 因为已经在基类处理  所以不需要手动处理
+        // $list = $list->map(function(Address $address) {
+        //     $address = $address->toArray();
+        //     $item = [];
+        //     foreach ($address as $key => $value) {
+        //         $key = lcfirst(Str::studly($key));
+        //         $item[$key] = $value;
+        //     }
+        //     return $item;
+        // });
 
         return $this->success([ 
             'total' => $list->count(),

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\User;
 
 use App\CodeResponse;
 use App\Exceptions\BussniessException;
-use App\Models\User;
+use App\Models\User\User;
 use App\Notifications\VerificationCode;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;

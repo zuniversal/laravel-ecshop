@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
-use App\Services\CatalogServices;
+use App\Services\Goods\CatalogServices;
 use Illuminate\Support\Str;
 
 const DEF_ID = 3;
@@ -39,7 +39,8 @@ class CatelogController extends WxController
         // dd($current->id);// 
         // var_dump(is_null($current));// 
 
-        $l2List = [];
+        // $l2List = [];
+        $l2List = null;// 6-3 初始值 修改为 null 去除 
         if (!is_null($current)) {
             $l2List = CatalogServices::getInstance()
                 ->getL2ListByPid($current->id);
@@ -51,7 +52,8 @@ class CatelogController extends WxController
         return $this->success([ 
             'categoryList' => $l1List->count(),
             'currentCategory' => $current, 
-            'currentSubCategory' => $l2List->toArray(),
+            // 'currentSubCategory' => $l2List->toArray(),
+            'currentSubCategory' => $l2List,
         ]); 
     }
     public function current(Request $request) {// 
@@ -65,14 +67,15 @@ class CatelogController extends WxController
             ->getL1ById($id);
 
         if (is_null($category)) {
-            return $this->fail(CodeResponse::PARAM_ILLEGAL);
+            return $this->fail(CodeResponse::PARAM_VALUE_ILLEGAL);
         }
         $l2List = CatalogServices::getInstance()
             ->getL2ListByPid($category->id);
 
         return $this->success([ 
             'currentCategory' => $category,
-            'currentSubCategory' => $l2List->toArray(),
+            // 'currentSubCategory' => $l2List->toArray(),
+            'currentSubCategory' => $l2List,
         ]); 
     }
 }

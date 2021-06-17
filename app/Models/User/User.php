@@ -1,14 +1,22 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\User;
 
+use App\Models\BaseModel;
+use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements JWTSubject
+class User extends BaseModel implements AuthenticatableContract, AuthorizableContract, JWTSubject
 {
+    // 6-3 user模型继承比较麻烦 因为 php 只能单继承  
+    // 解决 查看源码 手动引入需要的
+    use Authenticatable, Authorizable;
+    
     use Notifiable;
 
     // 6-2 不然会自动加上复数  litemall_users

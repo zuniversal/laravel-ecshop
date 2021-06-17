@@ -39,6 +39,12 @@ class WxController extends Controller
             'errmsg' => $info ?: $errmsg,
         ];
         if (!is_null($data)) {
+            // 6-3 去除 null 数据
+            if (is_array($data)) {
+                $data = array_filter($data, function($item) {
+                    return $item !== null; 
+                });
+            }
             $ret['data'] = $data;
         }
         return response()->json($ret);
