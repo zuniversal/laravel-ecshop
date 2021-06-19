@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Wx;
 
 use App\CodeResponse;
 use App\Http\Controllers\Controller;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 class WxController extends Controller
 {
@@ -51,7 +53,7 @@ class WxController extends Controller
     }
     protected function success($data = null) {
         // return $this->codeReturn(0, '成功', $data);
-        return $this->codeReturn(CodeResponse::SUCCESS, '成功', $data);
+        return $this->codeReturn(CodeResponse::SUCCESS, $data);
     }
     // protected function fail($errno, $errmsg) {
     //     return $this->codeReturn($errno, $errmsg);
@@ -71,5 +73,37 @@ class WxController extends Controller
             return $this->success($data); 
         }
         return $this->fail($codeResponse, $info); 
+    }
+
+    // 6-4
+    public function successPaginate($page) {// 
+        return $this->success($this->paginate($page)); 
+    }
+    public function paginate($page) {// 
+        // LengthAwarePaginator  是 page 返回值类型
+        if ($page instanceof LengthAwarePaginator) {
+            return [
+                'total' => $page->total(),
+                'page' => $page->currentPage(),
+                'limit' => $page->perPage(),
+                'pages' => $page->lastPage(),
+                'list' => $page->items(),
+            ];
+        }
+        if ($page instanceof Collection) {
+            $page = $page->toArray();
+        }
+        if (!is_array($page)) {
+            return $page; 
+        }
+        $total = count($page);
+
+        return [
+            'total' => $total,
+            'page' => 1,
+            'limit' => $total,
+            'pages' => 1,
+            'list' => $page,
+        ];
     }
 }

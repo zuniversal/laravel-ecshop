@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Notification;
 use Overtrue\EasySms\PhoneNumber;
 use App\Notifications\VerificationCode;
-use App\Service\Users\AddressServices;
+use App\Services\User\AddressServices;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -55,6 +55,7 @@ class AddressController extends WxController
         //     return $item;
         // });
 
+        // return $this->successPaginate($list); // 6-4
         return $this->success([ 
             'total' => $list->count(),
             'page' => 1, 
