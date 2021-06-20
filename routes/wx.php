@@ -32,5 +32,8 @@ Route::any('catalog/current', 'CatelogController@current'); // 分类目录当�
 Route::any('brand/list', 'BrandController@list'); // 品牌列表
 Route::any('brand/detail', 'BrandController@detail'); // 品牌详情
 
-
-
+// 6-5
+Route::any('goods/count', 'GoodsController@count');// 统计商品总数
+Route::any('goods/list', 'GoodsController@list');// 获得商品列表
+Route::any('goods/category', 'GoodsController@category');// 获得分类数据
+Route::any('goods/detail', 'GoodsController@detail');// 获得商品的详情

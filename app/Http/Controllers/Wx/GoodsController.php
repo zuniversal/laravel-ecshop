@@ -23,49 +23,51 @@ use Overtrue\EasySms\PhoneNumber;
 use App\Notifications\VerificationCode;
 use App\Service\Users\AddressServices;
 use App\Services\Goods\BrandServices;
+use App\Services\Goods\CatalogServices;
+use App\Services\Goods\GoodsServices;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-const DEF_ID = 3;
+const DEF_ID = 1;
 const DEF_MOBILE = 15160208607;
 const DEF_PASS = 1;
 
 
-// 6-4
-class BrandController extends WxController
+// 6-5
+class GoodsController extends WxController
 {
     protected $only = [
     ];
-    public function list(Request $request) {// 
-        $page = $request->input('page', 1);
-        $limit = $request->input('limit', 10);
-        $sort = $request->input('sort', 'add_time');
-        $order = $request->input('order', 'desc');
-        
-        $columns = [
-            'id', 'name', 'desc', 'pic_url', 'floor_price'
-        ];
-
-        $list = BrandServices::getInstance()->getBrandList(
-            $page, $limit, $sort, $order, $columns
-        );
-        // 返回的 $list 是集合对象 不是数组对象 导致返回方法出错 所以没有分页信息
-        return $this->successPaginate($list); 
-        // return $this->successPaginate($list->toArray()); 
-        // return $this->success($list); 
+    public function count(Request $request) {// 
+        $count = GoodsServices::getInstance()->countGoodsonSale();
+        return $this->success($count); 
     }
-    public function detail(Request $request) {// 
-        $id = $request->input('id', 0);
+    public function category(Request $request) {// 
+        $id = $request->input('id', 0) ?? DEF_ID;
         if (empty($id)) {
             return $this->fail(CodeResponse::PARAM_VALUE_ILLEGAL); 
         }
-        $brand = BrandServices::getInstance()->getBrand(
-            $id
-        );
-        if (is_null($brand)) {
+        $cur = CatalogServices::getInstance()->getCategory($id);
+        // dd($cur);// 
+        if (is_null($cur)) {
             return $this->fail(CodeResponse::PARAM_VALUE_ILLEGAL); 
         }
-        return $this->success($brand); 
+        
+        $parent = null;
+        $children = null;
+        if ($cur->pid() == 0) {// 为 0 时 $cur 是一级类目
+            $parent = $cur;
+            $children = CatalogServices::getL2ListByPid($cur->id);  
+        } else {
+            $parent = CatalogServices::getL1ById($cur->pid);  
+            $children = CatalogServices::getL2ListByPid($cur->pid);  
+        }
+        return $this->success([ 
+            'curremtCategory' => $cur,
+            'parentCategory' => $parent,
+            'botherCategory' => $children
+
+        ]);  
     }
 }
