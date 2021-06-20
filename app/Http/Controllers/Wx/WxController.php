@@ -106,4 +106,16 @@ class WxController extends Controller
             'list' => $page,
         ];
     }
+
+    public function islogin() {// 
+        // var_dump('  ===================== islogin ');// 
+        return !is_null($this->user());
+    }
+    public function userId() {// 
+        var_dump('  ===================== userId ');// 
+        var_dump($this->user());// 
+        return $this->user()->id; 
+        // 返回主键的值
+        // return $this->user()->getAuthIdentifier(); 
+    }
 }
