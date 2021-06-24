@@ -121,4 +121,16 @@ class UserServices extends BaseServices
         Cache::put('register_captcha_'.$mobile, strval($code), 600);
         return $code;// 
     }
+    // 6-9
+    public function getUsers(array $userIds)
+    {
+        if (empty($userIds)) {
+            return collect([]);
+        }
+        return User::query()
+            ->whereIn('id', $userIds)
+            ->where('deleted', 0)
+            ->get();
+    }
+
 }

@@ -1,21 +1,19 @@
 <?php
 
-namespace App\Models\Goods;
+namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
-use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Models\BaseModel;
 
-// 6-8
-class GoodsProduct extends BaseModel
+// 6-9
+class Comment extends BaseModel
 {
     use Notifiable;
 
-    protected $table = 'goods_product';
+    protected $table = 'comment';
 
 
     /**
@@ -42,6 +40,7 @@ class GoodsProduct extends BaseModel
 
     protected $casts = [
         'deleted' => 'boolean',
+        'pic_list' => 'array',
         
     ];
 

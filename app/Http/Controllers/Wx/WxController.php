@@ -109,6 +109,7 @@ class WxController extends Controller
 
     public function islogin() {// 
         // var_dump('  ===================== islogin ');// 
+        return true; 
         return !is_null($this->user());
     }
     public function userId() {// 

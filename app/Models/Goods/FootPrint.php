@@ -10,12 +10,12 @@ use Illuminate\Support\Str;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Models\BaseModel;
 
-// 6-8
-class GoodsProduct extends BaseModel
+// 6-9
+class FootPrint extends BaseModel
 {
     use Notifiable;
 
-    protected $table = 'goods_product';
+    protected $table = 'footprint';
 
 
     /**
@@ -24,6 +24,8 @@ class GoodsProduct extends BaseModel
      * @var array
      */
     protected $fillable = [
+       'user_id',
+       'goods_id',
     ];
 
     /**
@@ -42,6 +44,7 @@ class GoodsProduct extends BaseModel
 
     protected $casts = [
         'deleted' => 'boolean',
+        'floor_price' => 'float',
         
     ];
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Goods;
+namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Model;
@@ -11,11 +11,11 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Models\BaseModel;
 
 // 6-8
-class GoodsProduct extends BaseModel
+class Issue extends BaseModel
 {
     use Notifiable;
 
-    protected $table = 'goods_product';
+    protected $table = 'issue';
 
 
     /**

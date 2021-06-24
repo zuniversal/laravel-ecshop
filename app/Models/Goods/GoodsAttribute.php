@@ -11,11 +11,11 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Models\BaseModel;
 
 // 6-8
-class GoodsProduct extends BaseModel
+class GoodsAttribute extends BaseModel
 {
     use Notifiable;
 
-    protected $table = 'goods_product';
+    protected $table = 'goods_attribute';
 
 
     /**

@@ -3,10 +3,12 @@
 namespace App\Services\Goods;
 
 use App\Models\Goods\Brand;
+use App\Models\Goods\FootPrint;
 use App\Models\Goods\Goods;
 use App\Models\Goods\GoodsAttribute;
 use App\Models\Goods\GoodsProduct;
 use App\Models\Goods\GoodsSpecification;
+use App\Models\Issue;
 use App\Services\BaseServices;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -125,7 +127,7 @@ class GoodsServices extends BaseServices
             ->get()
             ->groupBy('specification')
             ;
-        dd($spec);// 
+        // dd($spec);// 
         return $spec->map(function ($v, $k) {
             return [
                 'name' => $k,
@@ -133,10 +135,27 @@ class GoodsServices extends BaseServices
             ];
         }) ;
     }
+
+    // 6-8 laravel 自带了一个时间戳格式的软删除功能
     public function getGoodsProduct(int $goodsId) {// 
         return GoodsProduct::query()
             ->where('goods_id', $goodsId)
             ->where('deleted', 0)
             ->get();
+    }
+    public function getGoodsIssue(int $page = 1, int $limit = 4) {// 
+        return Issue::query()
+            ->forPage($page, $limit)
+            ->get();
+    }
+    // 6-9
+    public function saveFootPrint($userId, $goodsId) {// 
+        $footPrint = new FootPrint();
+        $footPrint->fill([
+            'user_id' => $userId,
+            'goods_id' => $goodsId,
+        ]);
+        $footPrint->save();
+        return $footPrint; 
     }
 }

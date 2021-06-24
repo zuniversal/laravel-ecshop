@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\Notification;
 use Overtrue\EasySms\PhoneNumber;
 use App\Notifications\VerificationCode;
 use App\Service\Users\AddressServices;
+use App\Services\CollectServices;
+use App\Services\CommentServices;
 use App\Services\Goods\BrandServices;
 use App\Services\Goods\CatalogServices;
 use App\Services\Goods\GoodsServices;
@@ -31,11 +33,16 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
+
 const DEF_ID = 1;
 const DEF_MOBILE = 15160208607;
 const DEF_PASS = 1;
 
 // 6-7 当请求参数过多时 需要使用 对象形式去编写 并且结合参数验证
+// 6-9 FutureTask 开启多线程 并发的处理事情
+// 如果一页数据比较大 不建议在循环里查询数据 要批量的查询
+// 先把id都查询出来 然后批量的把数据查询出来 然后在循环里拼装上去 
+// 不用在循环里去查询 减少sql的数量  提高接口性能
 
 // 6-5
 class GoodsController extends WxController
@@ -139,7 +146,41 @@ class GoodsController extends WxController
         }
         $attr = GoodsServices::getInstance()->getGoodsAttribute($id);
         $spec = GoodsServices::getInstance()->getGoodsSpecification($id);
+        $product = GoodsServices::getInstance()->getGoodsProduct($id);
+        $issue = GoodsServices::getInstance()->getGoodsIssue();
+        // 6-9
+        $brand = $info->brand_id ? BrandServices::getInstance()->getBrand($info->brand_id) : [];
+        $comment = CommentServices::getInstance()->getCommentWithUserInfo($id);
+        // dd($comment);// 
         // dd($attr);
-        dd($spec);
+        // dd($spec);
+
+        $userHasCollect = 0;
+        if ($this->islogin()) {
+            // $userHasCollect = GoodsServices::getInstance()->getGoodsAttribute($id);
+            $userHasCollect = CollectServices::getInstance()->countByGoodsId(
+                // $this->userId(),
+                DEF_ID,
+                $id 
+            );
+            GoodsServices::getInstance()->saveFootPrint(
+                // $this->userId(),
+                DEF_ID,
+                $id
+            ); 
+        }
+
+        return $this->success([ 
+            'info' => $info,
+            '$userHasCollect' => $userHasCollect,
+            'issue' => $issue,
+            'comment' => $comment,
+            'specificationList' => $spec,
+            'productList' => $product,
+            'attribute' => $attr,
+            'brand' => $brand,
+            'groupon' => [],
+            'share' => $info->share_url,
+        ]);  
     }
 }
