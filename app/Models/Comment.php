@@ -41,6 +41,7 @@ class Comment extends BaseModel
     protected $casts = [
         'deleted' => 'boolean',
         'pic_list' => 'array',
+        'pic_urls' => 'array',// 6-10 真实要转换的属性
         
     ];
 

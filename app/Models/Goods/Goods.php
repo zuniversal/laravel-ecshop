@@ -47,6 +47,9 @@ class Goods extends BaseModel
         // 6-7
         'is_new' => 'boolean',
         'is_hot' => 'boolean',
+        // 6-10
+        'gallery' => 'array',
+        'is_on_sale' => 'boolean',
         
     ];
 
