@@ -3,12 +3,18 @@
 namespace App\Http\Controllers\Wx;
 
 use App\CodeResponse;
+use App\Exceptions\BussniessException;
 use App\Http\Controllers\Controller;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Validation\Rule;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Validator;
 
 class WxController extends Controller
 {
+    // 6-12 提取代码 效果与写在类里一样 只是方便管理
+    use VerifyRequestInput;
+
     // 5-13 所有接口都需要该中间件  提取到基类 解决重复编写
     // only 适合 大部分不需要验证的接口 except 相反
 
@@ -119,4 +125,17 @@ class WxController extends Controller
         // 返回主键的值
         // return $this->user()->getAuthIdentifier(); 
     }
+    // 6-11
+    // public function verifyId($key, $default = null) {// 
+    //     $value = request()->input($key, $default);
+    //     $validator = Validator::make([
+    //         $key => $value,
+    //     ], [
+    //         $key => 'integer|digits_between:1,20',
+    //     ]);
+    //     if ($validator->fails()) {
+    //         throw new BussniessException(CodeResponse::PARAM_VALUE_ILLEGAL);
+    //     }
+    //     return $value; 
+    // }
 }

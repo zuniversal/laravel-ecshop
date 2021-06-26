@@ -79,10 +79,10 @@ class GoodsServices extends BaseServices
         if (!empty($brandId)) {
             $query = $query->orderBy('brand_id', $brandId);
         }
-        if (!empty($isNew)) { 
+        if (!is_null($isNew)) { // 6-12 
             $query = $query->orderBy('is_new', $isNew);
         }
-        if (!empty($isHot)) {
+        if (!is_null($isHot)) {// 6-12 
             $query = $query->orderBy('is_hot', $isHot);
         }
         if (!empty($keyword)) {        

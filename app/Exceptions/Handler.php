@@ -2,7 +2,9 @@
 
 namespace App\Exceptions;
 
+use App\CodeResponse;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -53,6 +55,14 @@ class Handler extends ExceptionHandler
     // 5-7 对异常返回格式做一些格式化 统一处理 
     public function render($request, Throwable $exception)
     {
+        // 6-11
+        if ($exception instanceof ValidationException) {
+            return response()->json([
+                'errno' => CodeResponse::PARAM_VALUE_ILLEGAL[0],
+                'errmsg' => CodeResponse::PARAM_VALUE_ILLEGAL[1],
+            ]);
+        }
+
         if ($exception instanceof BussniessException) {
             return response()->json([
                 'errno' => $exception->getCode(),
