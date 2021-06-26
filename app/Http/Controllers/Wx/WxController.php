@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Wx;
 use App\CodeResponse;
 use App\Exceptions\BussniessException;
 use App\Http\Controllers\Controller;
+use App\VerifyRequestInput;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\Eloquent\Collection;

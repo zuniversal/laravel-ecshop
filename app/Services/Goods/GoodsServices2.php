@@ -2,7 +2,6 @@
 
 namespace App\Services\Goods;
 
-use App\Inputs\GoodsListInput;
 use App\Models\Goods\Brand;
 use App\Models\Goods\FootPrint;
 use App\Models\Goods\Goods;
@@ -35,7 +34,14 @@ class GoodsServices extends BaseServices
         }
         return $query->paginate($limit, $columns, 'page', $page);
     }
-    public function listGoods(GoodsListInput $input, $columns) {
+    public function listGoods(
+        $categoryId, $brandId, $isNew, $isHot, $keyword,
+        $columns = ['*'], // 6-7
+        $sort = 'add_time',
+        $order = 'desc',
+        $page = 1,
+        $limit = 10
+    ) {
         // $query = Goods::query()->where('deleted', 0);
         // if (!empty($categoryId)) {
         //     $query = $query->orderBy('category_id', $categoryId);
@@ -60,35 +66,41 @@ class GoodsServices extends BaseServices
 
         // return Goods::get();// 测试
 
-        $query = $this->getQueryByGoodsFilter($input);
-        return $query->orderBy($input->sort, $input->order)
+        $query = $this->getQueryByGoodsFilter($brandId, $isNew, $isHot, $keyword);
+        return $query->orderBy($sort, $order)
             // ->paginate($limit, ['*'], 'page', $page);
             // 6-7
-            ->paginate($input->limit, $columns, 'page', $input->page);
+            ->paginate($limit, $columns, 'page', $page);
     }
-    private function getQueryByGoodsFilter($input) {
+    private function getQueryByGoodsFilter(
+        $brandId, $isNew, $isHot, $keyword
+    ) {
         $query = Goods::query()->where('is_on_sale', 1);
-        if (!empty($input->brandId)) {
-            $query = $query->orderBy('brand_id', $input->brandId);
+        if (!empty($brandId)) {
+            $query = $query->orderBy('brand_id', $brandId);
         }
-        if (!is_null($input->isNew)) { // 6-12 
-            $query = $query->orderBy('is_new', $input->isNew);
+        if (!is_null($isNew)) { // 6-12 
+            $query = $query->orderBy('is_new', $isNew);
         }
-        if (!is_null($input->isHot)) {// 6-12 
-            $query = $query->orderBy('is_hot', $input->isHot);
+        if (!is_null($isHot)) {// 6-12 
+            $query = $query->orderBy('is_hot', $isHot);
         }
-        if (!empty($input->keyword)) {        
-            $query = $query->where(function (Builder $query) use ($input) {
+        if (!empty($keyword)) {        
+            $query = $query->where(function (Builder $query) use ($keyword) {
                 $query
-                    ->where('keywords', 'like', "%$input->keyword%")
-                    ->orWhere('name', 'like', "%$input->keyword%")
+                    ->where('keywords', 'like', "%$keyword%")
+                    ->orWhere('name', 'like', "%$keyword%")
                 ;
             });
         }
+        // var_dump('$brandId'.!empty($brandId) ? !empty($brandId) : 22);// 
+        // var_dump('$isNew'.!empty($isNew) ? !empty($isNew) : 22);// 
+        // var_dump('$isHot'.!empty($isHot) ? !empty($isHot) : 22);// 
+        // var_dump('$keyword'.!empty($keyword) ? !empty($keyword) : 22);// 
         return $query;
     }
-    public function listL2Category(GoodsListInput $input) {
-        $query = $this->getQueryByGoodsFilter($input);
+    public function listL2Category($brandId, $isNew, $isHot, $keyword) {
+        $query = $this->getQueryByGoodsFilter($brandId, $isNew, $isHot, $keyword);
         // dd($query->toSql());// 
         $categoryIds = $query->select(['category_id'])->pluck('category_id')
             ->unique()// 6-7 去重 

@@ -7,6 +7,7 @@ use App\Constant;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Wx\WxController;
 use App\Http\Middleware\Benchmark;
+use App\Inputs\GoodsListInput;
 use App\Models\User\Address;
 use App\Services\User\UserServices;
 use App\Models\Product;
@@ -133,6 +134,17 @@ class GoodsController extends WxController
         // $isHot = $request->input('isHot');
         // $page = $request->input('page', 1);
         // $limit = $request->input('limit', 10);
+
+
+        // 6-13
+        // $input = new GoodsListInput();
+        // $input = $input->fill();
+        $input = GoodsListInput::new();
+        // $input = GoodsListInput::new(\request()->input());
+        // $input = GoodsListInput::new(['brandId' => 1,]);
+        // dd($input);// 
+
+
         $sort = $request->input('sort', 'add_time');
         $order = $request->input('order', 'desc');
 
@@ -169,20 +181,24 @@ class GoodsController extends WxController
         //     // ,$order
         // ); 
         // var_dump('  ===================== ');// 
-        $goodslist = GoodsServices::getInstance()->listGoods(
-            $categoryId, $brandId, $isNew, $isHot,
-            $keyword,
-            $columns,// 6--7
-            $sort,
-            $order,
-            $page,
-            $limit
-        );
+        // $goodslist = GoodsServices::getInstance()->listGoods(
+        //     $categoryId, $brandId, $isNew, $isHot,
+        //     $keyword,
+        //     $columns,// 6--7
+        //     $sort,
+        //     $order,
+        //     $page,
+        //     $limit
+        // );
+
+        // 6-13
+        $goodslist = GoodsServices::getInstance()->listGoods($input, $columns);
 
         // dd($goodslist);// 
-        $categorylist = GoodsServices::getInstance()->listL2Category(
-            $brandId, $isNew, $isHot, $keyword
-        );
+        // $categorylist = GoodsServices::getInstance()->listL2Category(
+        //     $brandId, $isNew, $isHot, $keyword
+        // );
+        $categorylist = GoodsServices::getInstance()->listL2Category($input);
         
         $goodslist = $this->paginate($goodslist);// 6-7 补充
         
