@@ -25,6 +25,12 @@ class BaseModel extends Model
     // 在基类编写 解决导出编写数据转换代码的问题
     public function toArray() {// 
         $items = parent::toArray();
+
+        // 7-2 去除数据里的 null 字段
+        $items = array_filter($items, function($item) {
+            return !is_null($item);// 
+        });
+
         $keys = array_keys($items);
         $keys = array_map(function($key) {
             return lcfirst(Str::studly($key));// 

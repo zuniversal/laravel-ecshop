@@ -1,20 +1,16 @@
 <?php
 
-namespace App\Models;
+// 7-2
+namespace App\Models\Promotion;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Str;
 use App\Models\BaseModel;
 
-// 6-9
-class Collect extends BaseModel
+class Coupon extends BaseModel
 {
     use Notifiable;
 
-    protected $table = 'collect';
-
+    protected $table = 'coupon';
     protected $fillable = [
     ];
 

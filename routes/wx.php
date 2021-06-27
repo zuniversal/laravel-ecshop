@@ -1,5 +1,12 @@
 <?php
 
+// git clone git@gitee.com:TanFanCool/mcshop.git
+
+// 服务器集群就需要考虑session状态的共享  如果保存到redis 也会有问题 
+// 比如 持久层服务器挂了 整体登录就不可用了 - 可以解决redis 的单点问题 
+// 使用redis的集群来保证 服务是高可用的 把用户鉴权的信息保存在服务器 客户端只保存一份标识
+// 另一种是服务器不保存 会话信息 由客户端保存返回 服务器只负责生成和校验 
+
 use Illuminate\Support\Facades\Route;
 
 
@@ -37,3 +44,9 @@ Route::any('goods/count', 'GoodsController@count');// 统计商品总数
 Route::any('goods/list', 'GoodsController@list');// 获得商品列表
 Route::any('goods/category', 'GoodsController@category');// 获得分类数据
 Route::any('goods/detail', 'GoodsController@detail');// 获得商品的详情
+
+// 6-5
+Route::any('coupon/list', 'CouponController@list');// 优惠券列表
+Route::any('coupon/mylist', 'CouponController@mylist');// 我的优惠券列表
+Route::any('coupon/receive', 'CouponController@receive');// 优惠券领取
+

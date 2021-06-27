@@ -17,11 +17,6 @@ class SearchHistory extends BaseModel
 
     protected $table = 'search_history';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         // 6-7 解决 如下没有加入可插入属性 导致报错
         // Add [user_id] to fillable property to allow mass assignment on [App\Models\SearchHistory].
@@ -30,19 +25,8 @@ class SearchHistory extends BaseModel
         'from',
     ];
 
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
     protected $hidden = [
     ];
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
 
     protected $casts = [
         'deleted' => 'boolean',
