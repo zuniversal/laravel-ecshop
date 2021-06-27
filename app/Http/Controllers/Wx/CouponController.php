@@ -10,6 +10,7 @@ use App\Inputs\PageInput;
 use App\Models\User\Address;
 use App\Services\User\UserServices;
 use App\Models\Product;
+use App\Models\Promotion\CouponUser;
 use App\Models\User\User;
 use Carbon\Carbon;
 use Exception;
@@ -36,12 +37,12 @@ const DEF_PASS = 1;
 // 7-2
 class CouponController extends WxController
 {
-    // protected $only = [
-    // ];
-    protected $except = [
-        'list',
+    protected $only = [
     ];
-    public function list(Request $request) {// 
+    // protected $except = [
+    //     'list',
+    // ];
+    public function list() {// 
         $page = PageInput::new();
         $columns = [ 'id', 'name', 'desc', 'tag', 'discount', 'min', 'days', 'start_time', 'end_time', ];
         $list = CouponServices::getInstance()->list($page, $columns);
@@ -49,9 +50,39 @@ class CouponController extends WxController
         // return '$list'; 
         return $this->successPaginate($list); 
     }
+    // 7-3
     public function mylist() {// 
-        
-        
+        $status = $this->verifyId('status');
+        $page = PageInput::new();
+        $list = CouponServices::getInstance()->mylist(
+            // $this->userId(),
+            DEF_ID,
+            $status, $page);
+
+        $couponUserList = collect($list->items());
+        $couponIds = $couponUserList->pluck('coupon_id')->toArray();
+        $coupons = CouponServices::getInstance()->getCoupons($couponIds)->keyBy('id');
+
+       $mylist = $couponUserList->map(function (CouponUser $item) use ($coupons) {
+            $coupon = $coupons->get($item->coupont_id);
+            return [ 
+                'id' => $item->id, 
+                'cid' => $coupon->cid, 
+                'name' => $coupon->name, 
+                'desc' => $coupon->desc, 
+                'tag' => $coupon->tag, 
+                'min' => $coupon->min, 
+                'discount' => $coupon->discount, 
+                'startTime' => $item->startTime, 
+                'endTime' => $item->endTime, 
+                'available' => false,
+            ];
+        });
+
+        $list = $this->paginate($list);
+        $list['list'] = $mylist; 
+
+        return $this->success($list); 
     }
     public function receive() {// 
         

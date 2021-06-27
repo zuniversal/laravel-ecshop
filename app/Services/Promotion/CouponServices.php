@@ -5,6 +5,7 @@ namespace App\Services\Promotion;
 use App\Constant;
 use App\Inputs\PageInput;
 use App\Models\Promotion\Coupon;
+use App\Models\Promotion\CouponUser;
 use App\Services\BaseServices;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -20,5 +21,21 @@ class CouponServices extends BaseServices
             // ->forPage($page->page, $page->limit)
             // ->get($columns);
             ->paginate($page->limit, $columns, 'page', $page->page);
+    }
+    // 7-3
+    public function mylist($userId, $status, PageInput $page, $columns = ['*']) {
+     
+        return CouponUser::query()
+            ->where('user_id', $userId)
+            ->where('status', $status)
+            ->where('deleted', 0)
+            ->orderBy($page->sort, $page->order)
+            ->paginate($page->limit, $columns, 'page', $page->page);
+    }
+    public function getCoupons(array $ids, $columns = ['*']) {
+        return CouponUser::query()
+            ->whereIn('id', $ids)
+            ->where('deleted', 0)
+            ->get($columns);
     }
 }

@@ -86,15 +86,21 @@ class WxController extends Controller
     public function successPaginate($page) {// 
         return $this->success($this->paginate($page)); 
     }
-    public function paginate($page) {// 
+    public function paginate($page,
+        $list = null// 7-3
+    ) {// 
         // LengthAwarePaginator  是 page 返回值类型
         if ($page instanceof LengthAwarePaginator) {
+            $total = $page->total();
             return [
                 'total' => $page->total(),
                 'page' => $page->currentPage(),
+                'page' => $total == 0 ? 0 : $page->currentPage(),// 7-3
                 'limit' => $page->perPage(),
                 'pages' => $page->lastPage(),
-                'list' => $page->items(),
+                'pages' => $total == 0 ? 0 : $page->lastPage(),// 7-3
+                // 'list' => $page->items(),
+                'list' => $list ?? $page->items(),// 7-3
             ];
         }
         if ($page instanceof Collection) {
@@ -108,8 +114,10 @@ class WxController extends Controller
         return [
             'total' => $total,
             'page' => 1,
+            'page' => $total == 0 ? 0 : 1,
             'limit' => $total,
             'pages' => 1,
+            'pages' => $total == 0 ? 0 : 1,
             'list' => $page,
         ];
     }
