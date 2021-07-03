@@ -12,6 +12,11 @@ class CouponUser extends BaseModel
 
     protected $table = 'coupon_user';
     protected $fillable = [
+        // 7-4
+        'coupon_id',
+        'user_id',
+        'start_time',
+        'end_time',
     ];
 
     protected $hidden = [

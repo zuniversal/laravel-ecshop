@@ -38,7 +38,11 @@ class BaseServices
     }
 
     // 5-15 频繁使用 简化编写
-    public function throwBussniessException(array $codeResponse) {// 
-        throw new BussniessException($codeResponse);
+    public function throwBussniessException(array $codeResponse,
+        $info = ''
+    ) {// 
+        throw new BussniessException($codeResponse,
+            $info
+        );
     }
 }

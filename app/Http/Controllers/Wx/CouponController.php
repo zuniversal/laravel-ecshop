@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Wx;
 
 use App\CodeResponse;
+use App\Constant;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Wx\WxController;
 use App\Http\Middleware\Benchmark;
@@ -84,8 +85,63 @@ class CouponController extends WxController
 
         return $this->success($list); 
     }
+    // 7-4
     public function receive() {// 
-        
+        $couponId = $this->verifyId('coupon_id', 0);
+        $data =  CouponServices::getInstance()->receive(
+            // $this->userId(),
+            DEF_ID,
+            $couponId
+        );
+        return $this->success($data); 
+
+        // $page = PageInput::new();
+        // $coupon = CouponServices::getInstance()->getCoupon($couponId);
+        // if (is_null($coupon)) {
+        //     return $this->fail(CodeResponse::PARAM_ILLEGAL); 
+        // }
+        // if ($coupon->total > 0) {
+        //     $fetcedhCount = CouponServices::getInstance()->countCoupon($couponId);
+        //     if ($fetcedhCount >= $coupon->total) {
+        //         return $this->fail(CodeResponse::COUPON_EXCEED_LIMIT); 
+        //     }
+        // }
+        // if ($coupon->limit > 0) {
+        //     $fetcedhCount = CouponServices::getInstance()->countCouponByUserId(
+        //         // $this->userId()
+        //         DEF_ID
+        //     );
+        //     if ($fetcedhCount >= $coupon->limit) {
+        //         return $this->fail(CodeResponse::COUPON_EXCEED_LIMIT, '优惠券已经领取过'); 
+        //     }
+        // }
+        // if ($coupon->type != Constant::COUPON_TYPE_COMMON) {
+        //     return $this->fail(CodeResponse::COUPON_RECEIVE_FAIL, '优惠券类型不支持'); 
+        // }
+        // if ($coupon->status == Constant::COUPON_STATUS_OUT) {
+        //     return $this->fail(CodeResponse::COUPON_EXCEED_LIMIT); 
+        // }
+        // if ($coupon->status == Constant::COUPON_STATUS_EXPIRED) {
+        //     return $this->fail(CodeResponse::COUPON_RECEIVE_FAIL, '优惠券已经过期'); 
+        // }
+
+        // $couponUser = new CouponUser();// 
+        // if ($coupon->time_type == Constant::COUPON_TIME_TYPE_TIME) {
+        //     $startTime = $coupon->start_time;
+        //     $endTime = $coupon->end_time;
+        // } else {
+        //     $startTime = Carbon::now();
+        //     $endTime = $startTime->addDays($coupon->days);
+        // }
+
+        // $couponUser->fill([
+        //     'coupon_id' => $couponId,
+        //     // 'user_id' => $this->userId(),
+        //     'user_id' => DEF_ID,
+        //     'start_time' => $startTime,
+        //     'end_time' => $endTime,
+        // ]);
+        // $couponUser->save();
         
     }
 }
