@@ -23,10 +23,10 @@ class Category extends BaseModel
     protected $hidden = [
     ];
 
-    protected $casts = [
-        'deleted' => 'boolean',
+    // protected $casts = [
+    //     'deleted' => 'boolean',
         
-    ];
+    // ];
 
     // 6-3 提取到基类
     // public function toArray() {// 

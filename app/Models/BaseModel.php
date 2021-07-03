@@ -20,6 +20,24 @@ class BaseModel extends Model
     public const CREATED_AT = 'add_time';
     public const UPDATED_AT = 'update_time';
 
+    // 7-5 
+    public $defaultCasts = [
+        'deleted' => 'boolean',
+    ];
+    public function __construct($attributes = [])
+    {
+        parent::__construct($attributes);
+        parent::mergeCasts($this->defaultCasts);
+    }
+
+    // 可以选择使用 服务那样的实例化调用方法 在这里面做些初始化操作 
+    public function new($attributes = [])
+    {
+        // return new self();// 返回的是 BaseModal 
+        return new static();// 返回的是 对应的子类 
+    }
+
+
     // 不需要写 toArray 最终也可以  方法 即可自动帮我们转换 下划线转驼峰 
 
     // 在基类编写 解决导出编写数据转换代码的问题
@@ -42,5 +60,12 @@ class BaseModel extends Model
     // 6-7 覆写时间格式化函数
     public function serializeDate(DateTimeInterface $date) {// 
         return Carbon::instance($date)->toDateTimeString();
+    }
+
+    // 7-5 覆写模型表名转换方法 源码里： snake 转下划线 pluralStudly 转成复数 class_basename($this) 拿到实例的
+    // return $this->table ?? Str::snake(Str::pluralStudly(class_basename($this)));
+    // 不需要转成复数
+    public function getTable() {// 
+        return $this->table ?? Str::snake(class_basename($this));
     }
 }
