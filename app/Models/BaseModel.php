@@ -11,6 +11,8 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
+// 7-7 如果我们把它软删除后还对他进行修改 会导致继续更新 updated_time 如果不会再操作 更新时间就是 删除时间
+
 // 6-3
 class BaseModel extends Model
 {

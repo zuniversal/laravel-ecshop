@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\Benchmark;
+use App\Models\Goods\Goods;
 use App\Models\Product;
 use Exception;
 use Illuminate\Database\Query\Builder;
@@ -508,6 +509,24 @@ class LearnController extends Controller
     function facade() {
         \App\Facades\Product::getProduct(1);
         return 'facade';// 
+    }
+
+    // 7-7
+    function testSoftDelete() {
+        $res = Goods::query()->where('id', 1128010)
+            ->delete()
+        ;
+        dd($res);// 
+        return  
+        $paramas = Goods::query()->where('id', 1)
+            ->getBindings()
+        ;
+        var_dump($paramas);// 
+        $sql = Goods::query()->where('id', 1)
+            ->toSql()
+        ;
+        var_dump($sql);// 
+        return 'test';// 
     }
 
 }
