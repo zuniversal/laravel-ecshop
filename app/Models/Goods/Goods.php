@@ -14,7 +14,7 @@ use App\Models\BooleanSoftDeletes;
 // 6-5
 class Goods extends BaseModel
 {
-    use BooleanSoftDeletes;// 7-7 测试 修改软删除
+    // use BooleanSoftDeletes;// 7-7 测试 修改软删除
     use Notifiable;
 
     protected $table = 'goods';

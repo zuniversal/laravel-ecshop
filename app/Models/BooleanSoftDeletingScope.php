@@ -27,7 +27,7 @@ class BooleanSoftDeletingScope implements Scope
         $builder->onDelete(function (Builder $builder) {
             $column = $this->getDeletedAtColumn($builder);
 
-            // 获取到软删除后 更新时间戳 
+            // 获取到软删除后 更新时间戳 设置 deleted 值
             return $builder->update([
                 // $column => $builder->getModel()->freshTimestampString(),
                 $column => 1,

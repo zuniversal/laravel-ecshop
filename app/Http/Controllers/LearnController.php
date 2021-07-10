@@ -513,7 +513,19 @@ class LearnController extends Controller
 
     // 7-7
     function testSoftDelete() {
-        $res = Goods::query()->where('id', 1128010)
+        $goodsId = 1128010;
+        $item = Goods::query()->where('id', $goodsId)->get();
+        $item = Goods::query()->whereId($goodsId)->first();
+        $item = Goods::onlyTrashed()->whereId($goodsId)->first();
+        // dd($item);// 
+
+        // 注意 如果找不到对应的数据 调用该方法会报错
+        // Call to a member function restore() on null
+        $item = $item->restore();
+        $item = Goods::query()->whereId($goodsId)->first();
+
+        return; 
+        $res = Goods::query()->where('id', $goodsId)
             ->delete()
         ;
         dd($res);// 

@@ -12,10 +12,16 @@ use Illuminate\Support\Str;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 // 7-7 如果我们把它软删除后还对他进行修改 会导致继续更新 updated_time 如果不会再操作 更新时间就是 删除时间
+// 因此 设计表时用 布尔值来标记软删除是合理的  而且比使用 时间戳标记 性能更高些 
+// 覆写 查看源码 /vendor/laravel/framework/src/Illuminate/Database/Eloquent/SoftDeletes.php
+
+// 7-8 一般做单元测试 会在测试类里写一个 protected function setUp()  做一些数据初始化 跑每一个单元测试用例都会执行 该函数 
+// 注意 模型和查询构造器  delete 方法是不同的 
 
 // 6-3
 class BaseModel extends Model
 {
+    use BooleanSoftDeletes;// 7-8 上节课的修改主要是把 更新时间戳的地方修改为1 更新成null的地方修改为 0
     // 6-7 插入报错 因为 updated_at 是 model 自定义的 更新的时候会去更新的字段
     // SQLSTATE[42S22]: Column not found: 1054 Unknown column 'updated_at' in 'field list' (SQL: insert into `litemall_search_history` 
     // 覆写字段

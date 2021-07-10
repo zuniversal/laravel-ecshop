@@ -105,6 +105,7 @@ class CouponServices extends BaseServices
         }
 
         $couponUser = new CouponUser();// 
+        $couponUser->coupon_id// 7-6 测试 注释标记 
         if ($coupon->time_type == Constant::COUPON_TIME_TYPE_TIME) {
             $startTime = $coupon->start_time;
             $endTime = $coupon->end_time;

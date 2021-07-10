@@ -38,8 +38,8 @@ return [
         ],
         // 5-4
         'aliyun' => [
-            'assess_key_id' => 'LTAI5tRNgVNk1xH2wYeTTRDP',
-            'assess_key_secret' => 'g0aKfqRBIP6WaqJ5r1BdThx6TYczi8',
+            'assess_key_id' => '',
+            'assess_key_secret' => '',
             'sign_name' => '大鱼测试',
         ],
 
