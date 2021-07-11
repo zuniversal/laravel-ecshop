@@ -50,3 +50,9 @@ Route::any('coupon/list', 'CouponController@list');// 优惠券列表
 Route::any('coupon/mylist', 'CouponController@mylist');// 我的优惠券列表
 Route::any('coupon/receive', 'CouponController@receive');// 优惠券领取
 
+// 7-10
+Route::any('groupon/list', 'GrouponController@list');// 团购列表
+
+
+
+

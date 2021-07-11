@@ -53,7 +53,9 @@ class CouponController extends WxController
     }
     // 7-3
     public function mylist() {// 
-        $status = $this->verifyId('status');
+        $status = $this->verifyId('status',
+            // 0// 7-11
+        );
         $page = PageInput::new();
         $list = CouponServices::getInstance()->mylist(
             // $this->userId(),
@@ -64,7 +66,7 @@ class CouponController extends WxController
         $couponIds = $couponUserList->pluck('coupon_id')->toArray();
         $coupons = CouponServices::getInstance()->getCoupons($couponIds)->keyBy('id');
 
-       $mylist = $couponUserList->map(function (CouponUser $item) use ($coupons) {
+        $mylist = $couponUserList->map(function (CouponUser $item) use ($coupons) {
             $coupon = $coupons->get($item->coupont_id);
             return [ 
                 'id' => $item->id, 

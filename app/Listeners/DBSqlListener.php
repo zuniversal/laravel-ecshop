@@ -40,7 +40,7 @@ class DBSqlListener
             'testing',
             'local'
         ])) {
-            return  
+            return;  
         }
 
         $sql = $event->sql;

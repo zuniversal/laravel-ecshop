@@ -16,6 +16,16 @@ use Illuminate\Database\Eloquent\Builder;
 // 6-5
 class GoodsServices extends BaseServices
 {
+    // 7-10
+    public function getGoodsListByIds(array $ids) {
+        if (empty($ids)) {
+            return collect();// 
+        }
+        return Goods::query()
+            ->whereIn('id', $ids)
+            ->get();
+    }
+
     // 获取在售商品数量
     public function countGoodsonSale() {
         return Goods::query()
