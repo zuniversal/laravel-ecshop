@@ -37,13 +37,16 @@ class CodeResponse
     const ORDER_INVALID_OPERATION = [725, ''];
     const ORDER_COMMENTED = [726, ''];
     const ORDER_COMMENT_EXPIRED = [727, ''];
-    const GROUPON_EXPIRED = [730, ''];
-    const GROUPON_OFFL_INE = [731, ''];
-    const GROUPON_FULL = [732, ''];
-    const GROUPON_JOIN = [733, ''];
+
+    const GROUPON_EXPIRED = [730, '团购已过期'];// 7-12
+    const GROUPON_OFFL_INE = [731, '团购已下线'];// 7-12
+    const GROUPON_FULL = [732, '团购活动人数已满'];// 7-12
+    const GROUPON_JOIN = [733, '团购已参加'];// 7-12
+
     const COUPON_EXCEED_LIMIT = [740, '优惠券已领完'];// 7-4
     const COUPON_RECEIVE_FAIL = [741, '优惠券领取失败'];
     const COUPON_CODE_INVALID = [742, ''];
+    
     const AFTERSALE_UNALLOWED = [750, ''];
     const AFTERSALE_INVALID_AMOUNT = [751, ''];
     const AFTERSALE_INVALID_STATUS = [752, ''];

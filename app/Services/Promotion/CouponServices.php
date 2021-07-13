@@ -47,6 +47,7 @@ class CouponServices extends BaseServices
             ->orderBy($page->sort, $page->order)
             ->paginate($page->limit, $columns, 'page', $page->page);
     }
+    
     public function getCoupon($id, $columns = ['*']) {
         // var_dump($id);// 
         return Coupon::query()

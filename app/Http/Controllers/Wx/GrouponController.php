@@ -33,6 +33,10 @@ class GrouponController extends WxController
 {
   protected $only = [
   ];
+
+  // http://laravel.test/wx/groupon/list
+  // http://laravel.test/wx/groupon/list?status=1
+  // http://laravel.test/wx/groupon/list?status=2
   public function list() {// 
       $page = PageInput::new();
       $list = GrouponServices::getInstance()->getGrouponRules($page);

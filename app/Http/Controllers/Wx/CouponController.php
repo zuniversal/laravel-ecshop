@@ -53,8 +53,8 @@ class CouponController extends WxController
     }
     // 7-3
     public function mylist() {// 
-        $status = $this->verifyId('status',
-            // 0// 7-11
+        $status = $this->verifyId('status'
+            // , 0// 7-11
         );
         $page = PageInput::new();
         $list = CouponServices::getInstance()->mylist(
