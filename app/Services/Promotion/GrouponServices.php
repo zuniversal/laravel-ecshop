@@ -70,4 +70,37 @@ class GrouponServices extends BaseServices
         return;
     }
 
+    // 7-13
+    public function getGroupon($id, $columns = ['*']) {
+        return Groupon::query()->find($id, $columns);
+    }
+    // 生成开团或参团记录
+    public function openOrJoinGroupon($userId, $orderId, $ruleId, $linkId = null) {
+        // 卫语句 可以让我们的代码 嵌套更少 可读性更高
+        if ($ruleId == null || $ruleId <= 0) {
+            return $linkId;
+        }
+        $groupon = Groupon::new();
+        $groupon->order_id = $orderId;
+        $groupon->user_id = $userId;
+        $groupon->status = GrouponEnums::STATUS_NONE;
+        $groupon->rules_id = $ruleId;
+
+        if ($linkId == null || $linkId <= 0) {
+            $groupon->creator_user_id = $userId;
+            $groupon->creator_user_time = Carbon::now()->toDateTimeString();
+            $groupon->groupon_id = 0;
+            $groupon->save();
+            return $groupon->id; 
+        }
+
+        $openGroupon = $this->getGroupon($linkId);
+        $groupon->creator_user_id = $openGroupon->creator_user_id;
+        $groupon->groupon_id = $linkId;
+        $groupon->groupon_id = 0;
+        $groupon->share_url = $openGroupon->share_url;
+        $groupon->save();
+
+        return ;
+    }
 }
