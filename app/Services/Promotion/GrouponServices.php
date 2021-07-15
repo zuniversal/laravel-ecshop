@@ -103,4 +103,51 @@ class GrouponServices extends BaseServices
 
         return ;
     }
+    // 7-14
+    public function getGrouponOrderId($orderId) {
+        return Groupon::whereOrderId($orderId)->first();
+    }
+    // 支付成功 更新团活动购状态
+    public function payGrouponOrder($orderId) {
+        $groupon = $this->getGrouponOrderId($orderId);
+        if (is_null($groupon)) {
+            return; 
+        }
+        $rule = $this->getGrouponRulesById($groupon->rules_id);
+        if ($groupon->groupon_id == 0) {
+            $groupon->share_url = $this->createGrouponShareImage();
+        }
+        $groupon->status = GrouponEnums::STATUS_ON;
+        $isSuccess = $groupon->save();
+
+        if (!$isSuccess) {
+            $this->throwBussniessException(CodeResponse::UPDATED_FAIL);
+        }
+        if ($groupon->group_id == 0) {
+            return; 
+        }
+
+        $joinCount = $this->countGrouponJoin($groupon->groupon_id);
+        if ($joinCount < $rule->discount_member - 1) {
+            return; 
+        }
+        $row = Groupon::query()->where(
+            function (Builder $builder) use ($groupon) {
+                return $builder
+                    ->where('groupon_id', $groupon->groupon_id)
+                    ->where('id', $groupon->groupon_id);
+            }
+        )->update([
+            'status' => GrouponEnums::STATUS_SUCCEED,
+        ]);
+
+        if ($row == 0) {
+            $this->throwBussniessException(CodeResponse::UPDATED_FAIL);
+        }
+
+        $groupon->save();
+    }
+    public function createGrouponShareImage() {//  
+        return '';
+    }
 }
