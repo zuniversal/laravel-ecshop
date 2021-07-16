@@ -13,6 +13,7 @@ use App\Models\Promotion\GrouponRules;
 use App\Services\BaseServices;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 const DEF_ID = 1;
 class GrouponServices extends BaseServices
@@ -147,7 +148,10 @@ class GrouponServices extends BaseServices
 
         $groupon->save();
     }
-    public function createGrouponShareImage() {//  
-        return '';
+    // 7-15
+    public function createGrouponShareImage(GrouponRules $rules) {
+        $shareUrl = 'http://laravel.test/' . $rules->goods_id;
+        $qrCode = QrCode::format('png')->margin(1)->size(300)->generate($shareUrl);
+        return $qrCode;
     }
 }

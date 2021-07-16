@@ -15,6 +15,7 @@
         "laravel/framework": "^7.29",
         "laravel/tinker": "^2.5",
         "leonis/easysms-notification-channel": "^1.0",
+        "simplesoftwareio/simple-qrcode": "~2",
         "tymon/jwt-auth": "^1.0"
     },
     "require-dev": {
