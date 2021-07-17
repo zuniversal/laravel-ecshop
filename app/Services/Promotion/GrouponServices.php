@@ -13,6 +13,8 @@ use App\Models\Promotion\GrouponRules;
 use App\Services\BaseServices;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Intervention\Image\AbstractFont;
+use Intervention\Image\Facades\Image;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 const DEF_ID = 1;
@@ -151,7 +153,22 @@ class GrouponServices extends BaseServices
     // 7-15
     public function createGrouponShareImage(GrouponRules $rules) {
         $shareUrl = 'http://laravel.test/' . $rules->goods_id;
-        $qrCode = QrCode::format('png')->margin(1)->size(300)->generate($shareUrl);
-        return $qrCode;
+        $qrCode = QrCode::format('png')->margin(1)->size(290)->generate($shareUrl);
+
+        $goodsImage = Image::make($rules->pic_url)->resize(660, 660);
+        $image = Image::make(resource_path('images/back_groupon.png'))
+            ->insert($qrCode, 'top-left', 460, 770)
+            // ->insert($rules->pic_url)
+            ->insert($goodsImage, 'top-left', 71, 69)
+            ->text($rules->goods_name, 65, 867, function (AbstractFont $font) {
+                $font->color(array(167, 136, 69));
+                $font->size(28);
+                $font->file(resource_path('ttf/msyh.ttf'));
+            })
+            ;
+
+        return $image->encode();
+        // return $qrCode;
     }
+    // 7-16 环境默认是安装了GD库 没有安装 Imagick 扩展
 }
