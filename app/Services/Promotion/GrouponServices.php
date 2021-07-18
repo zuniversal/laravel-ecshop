@@ -13,6 +13,8 @@ use App\Models\Promotion\GrouponRules;
 use App\Services\BaseServices;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Intervention\Image\AbstractFont;
 use Intervention\Image\Facades\Image;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -152,9 +154,19 @@ class GrouponServices extends BaseServices
     }
     // 7-15
     public function createGrouponShareImage(GrouponRules $rules) {
-        $shareUrl = 'http://laravel.test/' . $rules->goods_id;
+        // $shareUrl = 'http://laravel.test/' . $rules->goods_id;
+
+        // 7-17 
+        // 如果路由没有定义对应的name 使用会报错 Invalid route action
+        $shareUrl = \route('home.redirectShareUrl', [
+            'type' => 'groupon',
+            'id' => $rules->goods_id // 商品id  知道跳转到哪个商品详情页
+        ]);
+        // dd($shareUrl);// 
+
         $qrCode = QrCode::format('png')->margin(1)->size(290)->generate($shareUrl);
 
+        // 7-16
         $goodsImage = Image::make($rules->pic_url)->resize(660, 660);
         $image = Image::make(resource_path('images/back_groupon.png'))
             ->insert($qrCode, 'top-left', 460, 770)
@@ -166,6 +178,17 @@ class GrouponServices extends BaseServices
                 $font->file(resource_path('ttf/msyh.ttf'));
             })
             ;
+
+        // 7-17 使用 public 存储
+        $filePath = 'groupon/'.Carbon::now()->toDateString().'/'.Str::random().'.png';
+        Storage::disk('public')->put($filePath, $image->encode());
+        $url = Storage::url($filePath);
+        // dd($url);// 直接访问该地址 发现 404 解决 需要在命令行执行下 php artisan storage:link
+
+        // 创建软连接需要使用到 symlink 函数 但是该函数在服务器被我们禁用掉了
+        // 解决 找到对应的php 版本的禁用函数设置 删除
+        // symlink() has been disabled for security reasons
+        // return $url; 
 
         return $image->encode();
         // return $qrCode;

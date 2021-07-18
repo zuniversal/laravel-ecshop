@@ -78,6 +78,8 @@ return [
     |
     */
 
+
+    // 7-17 在目录底下做一个软连接 允许外接访问 
     'links' => [
         public_path('storage') => storage_path('app/public'),
     ],

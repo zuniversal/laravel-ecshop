@@ -53,6 +53,7 @@ Route::any('coupon/receive', 'CouponController@receive');// 优惠券领取
 // 7-10
 Route::any('groupon/list', 'GrouponController@list');// 团购列表
 
-
+// 7-17
+Route::any('home/redirectShareUrl', 'HomeController@redirectShareUrl')->name('home.redirectShareUrl');// 
 
 

@@ -514,13 +514,6 @@ class LearnController extends Controller
 
     // 7-7
     function testSoftDelete() {
-
-        // 7-15 注意 如果没有给一个header 头 访问路由会发现是一堆乱码 浏览器认不出是图片 直接解析成文本了
-        $rules = GrouponServices::getInstance()->getGrouponRulesById(1);
-        $resp = GrouponServices::getInstance()->createGrouponShareImage($rules);
-        return response()->make($resp)->header('Content-Type', 'image/png');// 
-        return $resp;// 
-
         $goodsId = 1128010;
         $item = Goods::query()->where('id', $goodsId)->get();
         $item = Goods::query()->whereId($goodsId)->first();
@@ -547,6 +540,17 @@ class LearnController extends Controller
         ;
         var_dump($sql);// 
         return 'test';// 
+    }
+
+    // 7-17
+    function test() {
+        // 7-15 注意 如果没有给一个header 头 访问路由会发现是一堆乱码 浏览器认不出是图片 直接解析成文本了
+        $rules = GrouponServices::getInstance()->getGrouponRulesById(1);
+        // dd($rules);// 
+        $resp = GrouponServices::getInstance()->createGrouponShareImage($rules);
+        // dd($resp);// 
+        return response()->make($resp)->header('Content-Type', 'image/png');// 
+        return $resp;// 
     }
 
 }

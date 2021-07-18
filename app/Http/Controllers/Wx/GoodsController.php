@@ -209,7 +209,7 @@ class GoodsController extends WxController
     public function detail(Request $request) {// 
         // $id = $request->input('id') ?? DEF_ID;
         $id = $this->verifyId('id');// 6-12
-
+        
 
         if (empty($id)) {
             return $this->fail(CodeResponse::PARAM_ILLEGAL); 
