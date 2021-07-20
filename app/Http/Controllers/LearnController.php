@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Middleware\Benchmark;
 use App\Models\Goods\Goods;
+use App\Models\Goods\GoodsProduct;
 use App\Models\Product;
+use App\Models\User\User;
 use App\Services\Promotion\GrouponServices;
 use Exception;
 use Illuminate\Database\Query\Builder;
@@ -551,6 +553,15 @@ class LearnController extends Controller
         // dd($resp);// 
         return response()->make($resp)->header('Content-Type', 'image/png');// 
         return $resp;// 
+    }
+    // 7-17
+    function factory() {
+        $user = factory(User::class)->make();
+        // 会将生成的用户插入数据库
+        // $user = factory(User::class)->create();
+        // dd($user);
+        $product = factory(GoodsProduct::class)->create();
+        dd($product);
     }
 
 }

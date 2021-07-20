@@ -96,5 +96,6 @@ Route::any('/learn/cache', 'LearnController@cache');//
 Route::any('/learn/facade', 'LearnController@facade');// 
 Route::any('/learn/testSoftDelete', 'LearnController@testSoftDelete');// 
 Route::any('/learn/test', 'LearnController@test');// 
+Route::any('/learn/factory', 'LearnController@factory');// 
 
 

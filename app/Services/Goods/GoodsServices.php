@@ -156,4 +156,9 @@ class GoodsServices extends BaseServices
         $footPrint->save();
         return $footPrint; 
     }
+    // 8-2
+    public function getGoodsProductById(int $id) {// 
+        return GoodsProduct::query()->find($id);
+    }
+    
 }

@@ -9,6 +9,13 @@
 
 use Illuminate\Support\Facades\Route;
 
+// 8-1
+// 订单直接关联商品表会有问题 因为肯尼个会改信息 
+// litemall_order 表存在的问题 混合了订单表 物流表 以后如果拆出去 这种叫垂直拆分
+// 数据表的拆分 所以前期可以评估是否做拆分 - 即 技术判断力 包含： 编码 设计 业务理解 经验  架构师 是不断积累的过程 涉及很多因素
+
+
+
 
 // 6-1
 Route::get('auth/register', 'AuthController@register');// 
@@ -56,4 +63,15 @@ Route::any('groupon/list', 'GrouponController@list');// 团购列表
 // 7-17
 Route::any('home/redirectShareUrl', 'HomeController@redirectShareUrl')->name('home.redirectShareUrl');// 
 
+
+// 8-2
+Route::any('cart/add',  'CartController@add'); // 添加商品到购物车
+Route::any('cart/goodscount', 'CartController@goodscount'); // 获取购物车商品件数
+
+Route::any('cart/index', 'CartController@index'); // 获取购物车的数据
+Route::any('cart/fastadd', 'CartController@fastadd'); // 立即购买商品
+Route::any('cart/update', 'CartController@update'); // 更新购物车的商品I
+Route::any('cart/delete', 'CartController@delete'); // 删除购物车的商品
+Route::any('cart/checked', 'CartController@checked'); // 选择或取消选择商品
+Route::any('cart/checkout', 'CartController@checkout'); // 下单前信息确认
 

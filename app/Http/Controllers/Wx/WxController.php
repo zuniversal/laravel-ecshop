@@ -147,4 +147,12 @@ class WxController extends Controller
     //     }
     //     return $value; 
     // }
+    
+    // 8-2
+    protected function badArgument() {
+        return $this->fail(CodeResponse::PARAM_ILLEGAL);
+    }
+    protected function badArgumentValue() {
+        return $this->fail(CodeResponse::PARAM_VALUE_ILLEGAL);
+    }
 }
