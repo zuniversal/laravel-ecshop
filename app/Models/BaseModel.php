@@ -39,7 +39,7 @@ class BaseModel extends Model
     }
 
     // 可以选择使用 服务那样的实例化调用方法 在这里面做些初始化操作 
-    public function new($attributes = [])
+    public static function new($attributes = [])
     {
         // return new self();// 返回的是 BaseModal 
         return new static();// 返回的是 对应的子类 

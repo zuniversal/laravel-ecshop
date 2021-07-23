@@ -22,6 +22,9 @@ class Cart extends BaseModel
 
 protected $casts = [
     'checked' => 'boolean',
+    // 8-5 自己添加 解决 直接插入数组报错问题
+    // ErrorException       Array to string conversion
+    'specifications' => 'array',
       
   ];
 }

@@ -13,22 +13,22 @@ class CodeResponse
     const UN_LOGIN = [501, '请登录'];// 5-13
 
     // 业务返回码
-    const AUTH_INVALID_ACCOUNT = [700, ''];
+    const AUTH_INVALID_ACCOUNT = [700, '账号不存在'];
     const AUTH_CAPTCHA_UNSUPPORT = [701, ''];
     const AUTH_CAPTCHA_FREQUENCY = [702, '验证码未超时1分钟，不能发送'];
     const AUTH_CAPTCHA_UNMATCH = [703, '验证码错误'];
     const AUTH_NAME_REGISTERED = [704, '用户已注册'];
     const AUTH_MOBILE_REGISTERED = [705, '手机号已注册'];
-    const AUTH_MOBILE_UNREGISTERED = [706, ''];
+    const AUTH_MOBILE_UNREGISTERED = [706, '手机号码未注册'];
     const AUTH_INVALID_MOBILE = [707, '手机号格式不正确'];
     const AUTH_OPENID_UNACCESS = [708, ''];
     const AUTH_OPENID_BINDED = [709, ''];
-    const GOODS_UNSHELVE = [710, ''];
-    const GOODS_NO_STOCK = [711, ''];
+    const GOODS_UNSHELVE = [710, '商品已经下架'];
+    const GOODS_NO_STOCK = [711, '商品库存不足'];
     const GOODS_UNKNOWN = [712, ''];
     const GOODS_INVALID = [713, '']; 
     
-    const ORDER_UNKNOWN = [720, ''];
+    const ORDER_UNKNOWN = [720, '订单不存在'];
     const ORDER_INVALID = [721, ''];
     const ORDER_CHECKOUT_FAIL = [722, ''];
     const ORDER_CANCEL_FAIL = [723, ''];

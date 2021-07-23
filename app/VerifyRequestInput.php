@@ -42,4 +42,9 @@ trait VerifyRequestInput
     public function verifyEnum($key, $default = null, $enum = []) {
         return $this->verifyData($key, $default, Rule::in($enum)); 
     }
+    // 8-5
+    public function verifyArrayNotEmpty($key, $default = null) {
+        return $this->verifyData($key, $default, 'array|min:0'); 
+        return $this->verifyData($key, $default, 'array|min:1'); 
+    }
 }

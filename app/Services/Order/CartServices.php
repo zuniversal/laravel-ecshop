@@ -31,7 +31,7 @@ class CartServices extends BaseServices
     return Cart::query()
         ->where('user_id', $userId)
         ->where('goods_id', $goodsId)
-        ->where('prodcuct', $productId)
+        ->where('product_id', $productId)
         ->first();
   }
   public function countCartProduct($userId) {
@@ -53,12 +53,41 @@ class CartServices extends BaseServices
     $cart->pic_url = $product->pic_url ?: $goods->pic_url;
     $cart->price = $product->price;
     $cart->specifications = $product->specifications;
-    // $cart->user_id = $this->userId();
+    // $cart->user_id = $userId;
     $cart->user_id = DEF_ID;
     $cart->checked = true;// 注意 要赋值 布尔值 需要在model设置 cast 转换
     $cart->number = $number;
+    // 8-4
+    $cart->goods_id = $goods->id;
+    $cart->product_id = $product->id;
+
+    // dd($cart);
     $cart->save();
-     
     return $cart; 
+  }
+  // 8-5
+  public function getCartById($userId, $id) {
+    return Cart::query()
+      ->where('user_id', $userId)
+      ->where('id', $id)
+      ->first();
+  }
+  public function delete($userId, $productIds) {
+    // dd($userId, $productIds);
+    return Cart::query()
+      ->where('user_id', $userId)
+      // ->whereIn('product_id', $productIds)
+      ->delete();
+  }
+  public function list($userId) {
+    return [];
+  }
+  public function updateChecked($userId, $productIds, $isChecked) {
+    return Cart::query()
+        ->where('user_id', $userId)
+        // ->whereIn('product_id', $productIds)
+        ->update([
+          'checked' => $isChecked,
+        ]);
   }
 }

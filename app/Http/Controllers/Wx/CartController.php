@@ -32,15 +32,16 @@ class CartController extends WxController
   ];
 
   public function add() {// 
-    $goodsId = $this->verifyId('goodsId', 0);
-    $productId = $this->verifyId('productId', 0);
-    $number = $this->verifyInteger('number', 0);
+    $goodsId = $this->verifyId('goodsId', 1039051);
+    $productId = $this->verifyId('productId', 1);
+    $number = $this->verifyInteger('number', 1);
     
     if ($number <= 0) {
       return $this->badArgument(); 
     }
     
     $goods = GoodsServices::getInstance()->getGoods($goodsId);
+    // dd($goods);
     if (is_null($goods) || !$goods->is_on_sale) {
       return $this->fail(CodeResponse::GOODS_UNSHELVE); 
     }
@@ -48,6 +49,7 @@ class CartController extends WxController
     $product = GoodsServices::getInstance()->getGoodsProductById(
       $productId
     );
+    // dd($product);
     if (is_null($product)) {
       return $this->badArgument(); 
     }
@@ -58,6 +60,7 @@ class CartController extends WxController
       $goodsId,
       $productId
     );
+    // dd($cartProduct);
     if (is_null($cartProduct)) {
       CartServices::getInstance()->newCart(
         // $this->userId(),
@@ -85,5 +88,78 @@ class CartController extends WxController
     );
     dd($count);
     return $this->success($count); 
+  }
+
+  // 8-5 更新购物车数量
+  public function update () {// 
+    $id = $this->verifyId('id', 6);;
+    $goodsId = $this->verifyId('goodsId', 1039051);
+    $productId = $this->verifyId('productId', 1);;
+    $number = $this->verifyId('number', 66);;
+    
+    $cart = CartServices::getInstance()->getCartById(
+      DEF_ID,
+      $id
+    );
+    // dd($cart);
+    if (is_null($cart)) {
+      return $this->badArgumentValue(); 
+    }
+    // dd($goodsId);
+    // dd($cart->goods_id);
+    // dd($cart->goods_id != $goodsId);// 
+    // dd($cart->product_id != $productId);// 
+    if ($cart->goods_id != $goodsId || $cart->product_id != $productId) {
+      var_dump('  ===================== ');// 
+      return $this->badArgumentValsue(); 
+    }
+    // $goods = GoodsServices::getInstance()->getGoods($goodsId);
+    $goods = GoodsServices::getInstance()->getGoods(1039051);
+    // dd($goods);// 
+    if (is_null($goods) || !$goods->is_on_sale) {
+      return $this->fail(CodeResponse::GOODS_UNSHELVE); 
+    }
+    $product = GoodsServices::getInstance()->getGoodsProductById($productId);
+    // dd($product);// 
+    if (is_null($product) || $product->number < $number) {
+      return $this->fail(CodeResponse::GOODS_NO_STOCK); 
+    }
+    $cart->number = $number;
+    $ret = $cart->save();
+    // dd($ret);// 
+
+    return $this->failOrSuccess($ret); 
+  }
+  // 8-5
+  public function delete() {
+    $productIds = $this->verifyArrayNotEmpty('productIds', []);
+    // dd($productIds);// 
+    $res =  CartServices::getInstance()->delete(
+      DEF_ID,
+      $productIds
+    );
+    // dd($res);
+    // var_dump('  ===================== ');// 
+    $list = CartServices::getInstance()->list(
+      DEF_ID
+    );
+    // dd($list);
+    return $this->success($list); 
+  }
+  public function checked () {// 
+    $productIds = $this->verifyArrayNotEmpty('productIds', []);
+    $isChecked = $this->verifyBoolean('isChecked');
+    $res =  CartServices::getInstance()->updateChecked(
+      // $this->userId(),
+      DEF_ID,
+      $productIds,
+      $isChecked == 1
+    );
+    dd($res);
+    $list = CartServices::getInstance()->list(
+      // $this->userId()
+      DEF_ID
+    );
+    return $this->success($list); 
   }
 }
