@@ -15,6 +15,7 @@ use App\Models\Promotion\CouponUser;
 use App\Models\Promotion\Groupon;
 use App\Models\Promotion\GrouponRules;
 use App\Services\BaseServices;
+use App\Services\Goods\GoodsServices;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
@@ -67,6 +68,7 @@ class CartServices extends BaseServices
   }
   // 8-5
   public function getCartById($userId, $id) {
+    // dd($userId, $id);
     return Cart::query()
       ->where('user_id', $userId)
       ->where('id', $id)
@@ -90,4 +92,54 @@ class CartServices extends BaseServices
           'checked' => $isChecked,
         ]);
   }
+  // 8-6 提取
+  public function getGoodsInfo($goods, $productId) {// 
+    // $goods = GoodsServices::getInstance()->getGoods($goodsId);
+    $goods = GoodsServices::getInstance()->getGoods(1039051);
+    // dd($goods);// 
+    if (is_null($goods) || !$goods->is_on_sale) {
+      return $this->throwBussniessException(CodeResponse::GOODS_UNSHELVE); 
+    }
+    $product = GoodsServices::getInstance()->getGoodsProductById($productId);
+    // dd($product);// 
+    if (is_null($product)) {
+      return $this->throwBussniessException(CodeResponse::GOODS_NO_STOCK); 
+    }
+    return [
+      $goods, 
+      $product, 
+    ];
+  }
+  // public function editCart($existCart, $product, $number) {// 
+  public function editCart($existCart, $product, $num) {// 
+    // $num = $existCart->number + $number;
+    if ($num > $product->number) {
+      return $this->throwBussniessException(CodeResponse::GOODS_NO_STOCK); 
+    }
+    $existCart->number = $num;
+    $existCart->save();
+    return $existCart; 
+  }
+  public function add($userId, $goodsId, $productId, $number) {// 
+    // $goods = GoodsServices::getInstance()->getGoods($goodsId);
+    list($goods, $productId) = $this->getGoodsInfo($goodsId, $productId);
+    $carProduct = $this->getCartProduct($userId, $goodsId, $productId);
+    // dd($product);// 
+    if (is_null($carProduct)) {
+      return $this->newCart($userId, $goods, $productId, $number); 
+    }else {
+      $number = $carProduct->number + $number;// 将单独的状态提取到单独的调用处 变成统一的方法封装
+      return $this->editCart($carProduct, $productId, $number); 
+    } 
+  }
+  public function fastadd($userId, $goodsId, $productId, $number) {// 
+    list($goods, $productId) = $this->getGoodsInfo($goodsId, $productId);
+    $carProduct = $this->getCartProduct($userId, $goodsId, $productId);
+    // dd($product);// 
+    if (is_null($carProduct)) {
+      return $this->newCart($userId, $goods, $productId, $number); 
+    }else {
+      return $this->editCart($carProduct, $productId, $number); 
+    } 
+  } 
 }

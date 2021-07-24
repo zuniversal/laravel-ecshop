@@ -31,7 +31,7 @@ class CartController extends WxController
   protected $only = [
   ];
 
-  public function add() {// 
+  public function add2() {// 
     $goodsId = $this->verifyId('goodsId', 1039051);
     $productId = $this->verifyId('productId', 1);
     $number = $this->verifyInteger('number', 1);
@@ -80,6 +80,25 @@ class CartController extends WxController
     );
     return $this->success($count); 
   }
+
+  // 8-6
+  public function add() {// 
+    $goodsId = $this->verifyId('goodsId', 1039051);
+    $productId = $this->verifyId('productId', 1);
+    $number = $this->verifyInteger('number', 1);
+    $cartProduct = CartServices::getInstance()->add(
+      // $this->userId(),
+      DEF_ID,
+      $goodsId,
+      $productId,
+      $number
+    );
+    $count = CartServices::getInstance()->countCartProduct(
+      // $this->userId()
+      DEF_ID
+    );
+    return $this->success($count); 
+  }
   // 获取购物车商品件数
   public function goodscount() {// 
     $count = CartServices::getInstance()->countCartProduct(
@@ -92,10 +111,10 @@ class CartController extends WxController
 
   // 8-5 更新购物车数量
   public function update () {// 
-    $id = $this->verifyId('id', 6);;
+    $id = $this->verifyId('id', 6);
     $goodsId = $this->verifyId('goodsId', 1039051);
-    $productId = $this->verifyId('productId', 1);;
-    $number = $this->verifyId('number', 66);;
+    $productId = $this->verifyId('productId', 1);
+    $number = $this->verifyId('number', 66);
     
     $cart = CartServices::getInstance()->getCartById(
       DEF_ID,
@@ -110,8 +129,8 @@ class CartController extends WxController
     // dd($cart->goods_id != $goodsId);// 
     // dd($cart->product_id != $productId);// 
     if ($cart->goods_id != $goodsId || $cart->product_id != $productId) {
-      var_dump('  ===================== ');// 
-      return $this->badArgumentValsue(); 
+      // var_dump('  ===================== ');// 
+      return $this->badArgumentValue(); 
     }
     // $goods = GoodsServices::getInstance()->getGoods($goodsId);
     $goods = GoodsServices::getInstance()->getGoods(1039051);
@@ -161,5 +180,21 @@ class CartController extends WxController
       DEF_ID
     );
     return $this->success($list); 
+  }
+  // 8-6 立即购买
+  public function fastadd () {// 
+    $goodsId = $this->verifyId('goodsId', 1039051);
+    $productId = $this->verifyId('productId', 1);
+    $number = $this->verifyId('number', 66);
+    
+    $cart = CartServices::getInstance()->fastadd(
+      DEF_ID,
+      $goodsId,
+      $productId,
+      $number
+    );
+    // dd($cart);
+    
+    return $this->success($cart->id); 
   }
 }
