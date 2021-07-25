@@ -163,7 +163,9 @@ class CartController extends WxController
       DEF_ID
     );
     // dd($list);
-    return $this->success($list); 
+    // return $this->success($list); 
+    // 8-7
+    return $this->index(); 
   }
   public function checked () {// 
     $productIds = $this->verifyArrayNotEmpty('productIds', []);
@@ -179,13 +181,15 @@ class CartController extends WxController
       // $this->userId()
       DEF_ID
     );
-    return $this->success($list); 
+    // return $this->success($list); 
+    // 8-7
+    return $this->index(); 
   }
   // 8-6 立即购买
   public function fastadd () {// 
     $goodsId = $this->verifyId('goodsId', 1039051);
     $productId = $this->verifyId('productId', 1);
-    $number = $this->verifyId('number', 66);
+    $number = $this->verifyId('number', 22);
     
     $cart = CartServices::getInstance()->fastadd(
       DEF_ID,
@@ -196,5 +200,39 @@ class CartController extends WxController
     // dd($cart);
     
     return $this->success($cart->id); 
+  }
+  // 8-7 购物车列表信息
+  public function index() {// 
+    $list = CartServices::getInstance()->getValidCartList(
+      // $this->userId(),
+      DEF_ID
+    );
+    // dd($list);
+    $goodsCount = 0;
+    $goodsAmount = 0;
+    $checkedGoodsCount = 0;
+    $checkedGoodsAmount = 0;
+    foreach ($list as $item) {
+      $goodsCount += $item->number;
+      // $goodsCount += $item->price * $item->number;
+      // 浮点型直接相加等会有精度损失  传入精度2  默认精度是 0 如果不传会给我们转成整数
+      $amount = bcmul($item->price, $item->number, 2);
+      $goodsAmount = bcadd($goodsAmount, $amount, 2);
+      if ($item->checked) {
+        $checkedGoodsCount += $item->number;
+        $checkedGoodsAmount = bcadd($goodsAmount, $amount, 2);
+      }
+    }
+
+    // 调用精度计算反复返回的结果是字符串 实验 double 转化为 数值类型
+    return $this->success([
+      'cartList' => $list,
+      'cartTotal' => [
+        'goodsCount' => $goodsCount,
+        'goodsAmount' => (double) $goodsAmount,
+        'checkedGoodsCount' => $checkedGoodsCount,
+        'checkedGoodsAmount' => (double) $checkedGoodsAmount,
+       ],
+    ]); 
   }
 }

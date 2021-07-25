@@ -142,4 +142,38 @@ class CartServices extends BaseServices
       return $this->editCart($carProduct, $productId, $number); 
     } 
   } 
+  // 8-7
+  public function getCartList($userId) {
+    return Cart::query()
+      ->where('user_id', $userId)
+      ->get();
+  }
+  public function getValidCartList($userId) {
+    $list = $this->getCartList($userId);
+    $goodsIds = $list->pluck('goods_id')->toArray();
+    $goodsList = GoodsServices::getInstance()->getGoodsListByIds($goodsIds)
+      ->keyBy('id')
+    ;
+    // dd($goodsList);
+    $invalidCartIds = [];
+    // 注意 如果要让修改的数值在外面也能生效 使用 需要在变量前 加上  & 表示传址
+    $list->filter(function (Cart $cart) use ($goodsList, &$invalidCartIds) {
+      // dd($cart->goods_id);
+      $goods = $goodsList->get($cart->goods_id);
+      // dd($goods);
+      $isValid = !empty($goods) && $goods->is_on_sale;
+      if (!$isValid) {
+        $invalidCartIds[] = $cart->id;
+      } 
+      return $isValid; 
+    });
+    // dd($invalidCartIds);
+    return $list; 
+  }
+  public function deleteCartList($ids) {// 
+    if (empty($ids)) {
+      return 0; 
+    }
+    Cart::query()->where('id', $ids)->delete();
+  }
 }
