@@ -12,9 +12,8 @@ use App\Services\BaseServices;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 
-use function PHPUnit\Framework\isNull;
 
-const DEF_ID = 1;
+// const DEF_ID = 1;
 class CouponServices extends BaseServices
 {
     public function list(PageInput $page, $columns = ['*']) {
@@ -43,7 +42,7 @@ class CouponServices extends BaseServices
      
         return CouponUser::query()
             ->where(!is_null($status), function(Builder $query) use ($status) {
-                return $query->where('status', $status)
+                return $query->where('status', $status);
             })
             ->orderBy($page->sort, $page->order)
             ->paginate($page->limit, $columns, 'page', $page->page);
@@ -191,5 +190,9 @@ class CouponServices extends BaseServices
                 return false;
         }
         return true;
+    }
+    // 8-9
+    public function getCouponUser($id, $columns = ['*']) {
+        return CouponUser::query()->find($id, $columns);
     }
 }

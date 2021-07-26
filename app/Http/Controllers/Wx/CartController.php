@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Notification;
 use App\Services\Promotion\GrouponServices;
 use App\Services\Promotion\CouponServices;
 use App\Services\User\AddressServices;
+use App\SystemServices;
 
 const DEF_ID = 1;
 const DEF_MOBILE = 15160208607;
@@ -238,20 +239,22 @@ class CartController extends WxController
        ],
     ]); 
   }
-  // 8-8
+  // 8-8 下单前信息确认
   public function checkout() {// 
     $cartId = $this->verifyInteger('cartId');
-    $addressId = $this->verifyInteger( 'addressId');
+    $addressId = $this->verifyInteger('addressId', 1);
     $couponId = $this->verifyInteger('couponId');
     $userCouponId = $this->verifyInteger('userCouponId');
     $grouponRulesId = $this->verifyInteger('grouponRulesId');
     
+    // dd($addressId);
     // 获取地址
     if (empty($addressId)) {
       $address = AddressServices::getInstance()->getDefaultAddress(
-        // $this->userId()
+        // $this->userId() 
         DEF_ID
       );
+      $addressId = $address->id ?? 0;// 8-9
     } else {
       $address = AddressServices::getInstance()->getAddress(
         // $this->userId()
@@ -291,8 +294,8 @@ class CartController extends WxController
       } else {
         $price = $cart->price;
       }
-      $price = bcmul($price, $cart->number);
-      $checkedGoodsPrice = bcadd($checkedGoodsPrice, $price);
+      $price = bcmul($price, $cart->number, 2);
+      $checkedGoodsPrice = bcadd($checkedGoodsPrice, $price, 2);
     }
 
     // 获取合适当前价格的优惠券列表  并根据优惠折扣进行降序排序
@@ -316,6 +319,53 @@ class CartController extends WxController
       $coupon = $coupons->get($couponUser->coupon_id);
       return $coupon->discount; 
     });
+
+    // 8-9 如果用户选了优惠券 判断下是否可以使用 
+    $couponPrice = 0;
+    if (is_null($couponIds) || $couponId == -1) {
+      $couponId = -1;
+      $userCouponId = -1;
+    } else if ($couponId == 0) {
+      $couponUser = $couponUsers->first();
+      $couponId = $couponUser->coupon_id ?? 0;
+      $userCouponId = $couponUser->id ?? 0;
+      $couponPrice = CouponServices::getInstance()->getCoupon($couponId)->discount ?? 0; 
+    } else {
+      $coupon = CouponServices::getInstance()->getCoupon($couponId); 
+      $couponUser = CouponServices::getInstance()->getCouponUser($userCouponId); 
+      $is = CouponServices::getInstance()->checkCouponAndPrice($coupon, $couponUser, $checkedGoodsPrice); 
+      if ($is) {
+        $couponPrice = $coupon->discount ?? 0; 
+      }
+    } 
+
+    $freighPrice = 0;// 运费
+    $freighMin = SystemServices::getInstance()->getFreighMin(); 
+    // 商品金额小于运费金额
+    if (bccomp($freighMin, $checkedGoodsPrice) === 1) {
+      $freighPrice = SystemServices::getInstance()->getFreighValue(); 
+    }
+    // 计算订单金额
+    $orderPrice = bcadd($checkedGoodsPrice, $freighPrice, 2);
+    $orderPrice = bcsub($orderPrice, $couponPrice, 2);
+
+    // dd($address);
+    return $this->success([
+      'addressId' => $addressId,
+      'couponId' => $couponId,
+      'userCouponId' => $userCouponId,
+      'cartId' => $cartId,
+      'grouponRulesId' => $grouponRulesId,
+      'grouponPrice' => $grouponPrice,
+      'checkedAddress' => $address->toArray(),
+      'availableCouponLength' => $couponUsers->count(),
+      'goodsTotalPrice' => $checkedGoodsPrice,
+      'freighPrice' => $freighPrice,
+      'couponPrice' => $couponPrice,
+      'orderTotalPrice' => $orderPrice,
+      'actualPrice' => $orderPrice,
+      'checkedGoodsList' => $checkedGoodsList->toArray(),
+    ]);
   }
   
 
