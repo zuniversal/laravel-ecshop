@@ -4,6 +4,7 @@ namespace App\Services\Promotion;
 
 use App\CodeResponse;
 use App\Constant;
+use App\Enums\GrouponUserEnums;
 use App\Inputs\PageInput;
 use App\Models\Promotion\Coupon;
 use App\Models\Promotion\CouponUser;
@@ -118,7 +119,7 @@ class CouponServices extends BaseServices
         }
 
         $couponUser = new CouponUser();// 
-        $couponUser->coupon_id// 7-6 测试 注释标记 
+        // $couponUser->coupon_id;// 7-6 测试 注释标记 
         if ($coupon->time_type == Constant::COUPON_TIME_TYPE_TIME) {
             $startTime = $coupon->start_time;
             $endTime = $coupon->end_time;
@@ -140,5 +141,55 @@ class CouponServices extends BaseServices
         $couponUser->save();
         
         // return $this->success(); 
+    }
+    // 8-8
+    public function getUsableCoupons($userId) {
+        return CouponUser::query()
+            ->where('user_id', $userId)// 
+            ->where('status', GrouponUserEnums::STATUS_USABLE)
+            ->get();
+    }
+    // 验证当前价格是否可以使用这张优惠券
+    public function checkCouponAndPrice($coupon, $couponUser, $price) {// 
+        if (empty($couponUser)) {
+            return false; 
+        }
+        if (empty($coupon)) {
+            return false; 
+        }
+        if ($couponUser->coupon_id !== $coupon->id) {
+            return false; 
+        }
+        if ($coupon->status !== Constant::COUPON_STATUS_NORMAL) {
+            return false; 
+        }
+        if ($coupon->goods_type !== Constant::COUPON_GOODS_TYPE_ALL) {
+            return false; 
+        }
+        
+        //   如果满减没有到 不符合
+        if (bccomp($coupon->min, $price) == 1) {
+            return false;
+        }
+
+        $now = now();
+        switch ($coupon->time_type) {
+            case Constant::COUPON_TIME_TYPE_TIME:
+                $start = Carbon::parse($coupon->start_time);
+                $end = Carbon::parse($coupon->end_time);
+                if ($now->isBefore($start) || $now->isAfter($end)) {
+                    return false;
+                }
+                break;
+            case Constant::COUPON_TIME_TYPE_DAYS:
+                $expired = Carbon::parse($couponUser->add_time)->addDays($coupon->days);
+                if ($now->isAfter($expired)) {
+                    return false;
+                }
+                break;
+            default:
+                return false;
+        }
+        return true;
     }
 }

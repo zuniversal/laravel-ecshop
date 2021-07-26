@@ -8,6 +8,7 @@ use App\Http\Controllers\Wx\WxController;
 use App\Inputs\GoodsListInput;
 use App\Inputs\PageInput;
 use App\Models\Goods\Cart;
+use App\Models\Promotion\CouponUser;
 use App\Models\Promotion\GrouponRules;
 use App\Services\Goods\GoodsServices;
 use App\Services\Order\CartServices;
@@ -21,6 +22,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Notification;
 use App\Services\Promotion\GrouponServices;
+use App\Services\Promotion\CouponServices;
+use App\Services\User\AddressServices;
 
 const DEF_ID = 1;
 const DEF_MOBILE = 15160208607;
@@ -235,4 +238,85 @@ class CartController extends WxController
        ],
     ]); 
   }
+  // 8-8
+  public function checkout() {// 
+    $cartId = $this->verifyInteger('cartId');
+    $addressId = $this->verifyInteger( 'addressId');
+    $couponId = $this->verifyInteger('couponId');
+    $userCouponId = $this->verifyInteger('userCouponId');
+    $grouponRulesId = $this->verifyInteger('grouponRulesId');
+    
+    // 获取地址
+    if (empty($addressId)) {
+      $address = AddressServices::getInstance()->getDefaultAddress(
+        // $this->userId()
+        DEF_ID
+      );
+    } else {
+      $address = AddressServices::getInstance()->getAddress(
+        // $this->userId()
+        DEF_ID,
+        $addressId
+      );
+      if (empty($address)) {
+        return $this->badArgumentValue(); 
+      }
+    } 
+    // 获取购物车的商品列表
+    if (empty($cartId)) {
+      $checkedGoodsList = CartServices::getInstance()->getCheckedCartList(
+        // $this->userId()
+        DEF_ID
+      ); 
+    } else {
+      $cart = CartServices::getInstance()->getCartById(
+        // $this->userId()
+        DEF_ID,
+        $cartId
+      ); 
+      if (empty($cart)) {
+        return $this->badArgumentValue(); 
+      }
+      $checkedGoodsList = collect([$cart]);// getCheckedCartList 返回一个集合 所以 也需要使用 collect 包裹一下
+    } 
+
+    $grouponRuless = GrouponServices::getInstance()->getGrouponRulesById($grouponRulesId);
+    $checkedGoodsPrice = 0;// 总价格
+    $grouponPrice = 0;
+
+    foreach ($checkedGoodsList as $cart) {
+      if ($grouponRuless && $grouponRuless->goods_id == $cart->goods_id) {
+        $price = bcsub($cart->price, $grouponRuless->discount, 2);
+        $grouponPrice = bcmul($grouponRuless->discount, $cart->number, 2);
+      } else {
+        $price = $cart->price;
+      }
+      $price = bcmul($price, $cart->number);
+      $checkedGoodsPrice = bcadd($checkedGoodsPrice, $price);
+    }
+
+    // 获取合适当前价格的优惠券列表  并根据优惠折扣进行降序排序
+    $couponUsers = CouponServices::getInstance()->getUsableCoupons(
+      // $this->userId()
+      DEF_ID
+    );
+    $couponIds = $couponUsers->pluck('coupon_id')->toArray();
+    $coupons = CouponServices::getInstance()->getCoupon($couponIds);
+
+    $couponUsers->filter(function (CouponUser $couponUser) use ($coupons, $checkedGoodsPrice) {
+      $coupon = $coupons->get($couponUser->coupon_id);
+
+      return CouponServices::getInstance()->checkCouponAndPrice(
+        $coupon, 
+        $couponUser, 
+        $checkedGoodsPrice
+      ); 
+    })
+    ->sortByDesc(function (CouponUser $couponUser) use ($coupons) {
+      $coupon = $coupons->get($couponUser->coupon_id);
+      return $coupon->discount; 
+    });
+  }
+  
+
 }

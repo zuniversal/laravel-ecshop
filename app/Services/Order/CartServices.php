@@ -14,6 +14,7 @@ use App\Models\Promotion\Coupon;
 use App\Models\Promotion\CouponUser;
 use App\Models\Promotion\Groupon;
 use App\Models\Promotion\GrouponRules;
+use App\Models\User\Address;
 use App\Services\BaseServices;
 use App\Services\Goods\GoodsServices;
 use Carbon\Carbon;
@@ -175,5 +176,12 @@ class CartServices extends BaseServices
       return 0; 
     }
     Cart::query()->where('id', $ids)->delete();
+  }
+  // 8-8
+  public function getCheckedCartList($userId) {// 
+    return Cart::query()
+      ->where('user_id', $userId)
+      ->where('checked', 1)
+      ->get();
   }
 }

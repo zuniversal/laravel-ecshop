@@ -32,4 +32,11 @@ class AddressServices extends BaseServices
         }
         return $address->delete();
     }
+    // 8-8
+    public function getDefaultAddress($userId) {
+      return Address::query()
+        ->where('user_id', $userId)
+        ->where('is_default', 1)
+        ->first();
+    }
 }
