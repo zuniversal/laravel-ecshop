@@ -246,98 +246,143 @@ class CartController extends WxController
     $couponId = $this->verifyInteger('couponId');
     $userCouponId = $this->verifyInteger('userCouponId');
     $grouponRulesId = $this->verifyInteger('grouponRulesId');
-    
-    // dd($addressId);
-    // 获取地址
-    if (empty($addressId)) {
-      $address = AddressServices::getInstance()->getDefaultAddress(
-        // $this->userId() 
-        DEF_ID
-      );
-      $addressId = $address->id ?? 0;// 8-9
-    } else {
-      $address = AddressServices::getInstance()->getAddress(
-        // $this->userId()
-        DEF_ID,
-        $addressId
-      );
-      if (empty($address)) {
-        return $this->badArgumentValue(); 
-      }
-    } 
-    // 获取购物车的商品列表
-    if (empty($cartId)) {
-      $checkedGoodsList = CartServices::getInstance()->getCheckedCartList(
-        // $this->userId()
-        DEF_ID
-      ); 
-    } else {
-      $cart = CartServices::getInstance()->getCartById(
-        // $this->userId()
-        DEF_ID,
-        $cartId
-      ); 
-      if (empty($cart)) {
-        return $this->badArgumentValue(); 
-      }
-      $checkedGoodsList = collect([$cart]);// getCheckedCartList 返回一个集合 所以 也需要使用 collect 包裹一下
-    } 
 
+    // 8-10 获取地址
+    $address = AddressServices::getInstance()->getAddressOrDefault(
+      // $this->userId() 
+      DEF_ID,
+      $addressId
+    );
+    $addressId = $address->id ?? 0;// 8-9
+
+    // // dd($addressId);
+    // // 获取地址
+    // if (empty($addressId)) {
+    //   $address = AddressServices::getInstance()->getDefaultAddress(
+    //     // $this->userId() 
+    //     DEF_ID
+    //   );
+    //   $addressId = $address->id ?? 0;// 8-9
+    // } else {
+    //   $address = AddressServices::getInstance()->getAddress(
+    //     // $this->userId()
+    //     DEF_ID,
+    //     $addressId
+    //   );
+    //   if (empty($address)) {
+    //     return $this->badArgumentValue(); 
+    //   }
+    // } 
+    
     $grouponRuless = GrouponServices::getInstance()->getGrouponRulesById($grouponRulesId);
     $checkedGoodsPrice = 0;// 总价格
     $grouponPrice = 0;
 
-    foreach ($checkedGoodsList as $cart) {
-      if ($grouponRuless && $grouponRuless->goods_id == $cart->goods_id) {
-        $price = bcsub($cart->price, $grouponRuless->discount, 2);
-        $grouponPrice = bcmul($grouponRuless->discount, $cart->number, 2);
-      } else {
-        $price = $cart->price;
-      }
-      $price = bcmul($price, $cart->number, 2);
-      $checkedGoodsPrice = bcadd($checkedGoodsPrice, $price, 2);
-    }
+    
+    // 获取购物车的商品列表
 
-    // 获取合适当前价格的优惠券列表  并根据优惠折扣进行降序排序
-    $couponUsers = CouponServices::getInstance()->getUsableCoupons(
+    // 8-10
+    // 计算订单总金额
+    $checkedGoodsList = CartServices::getInstance()->getCheckedCartList(
       // $this->userId()
-      DEF_ID
-    );
-    $couponIds = $couponUsers->pluck('coupon_id')->toArray();
-    $coupons = CouponServices::getInstance()->getCoupon($couponIds);
+      DEF_ID,
+      $cartId
+    ); 
+    $availableCouponLength = 0;// 获取优惠券信息
 
-    $couponUsers->filter(function (CouponUser $couponUser) use ($coupons, $checkedGoodsPrice) {
-      $coupon = $coupons->get($couponUser->coupon_id);
+    // 获取优惠券信息
+    $couponUser = CouponServices::getInstance()->getMostMeetPriceCoupon(
+      // $this->userId(),
+      DEF_ID,
+      $couponId,
+      // $userCouponId,
+      $checkedGoodsPrice,
+      $availableCouponLength
+    ); 
 
-      return CouponServices::getInstance()->checkCouponAndPrice(
-        $coupon, 
-        $couponUser, 
-        $checkedGoodsPrice
-      ); 
-    })
-    ->sortByDesc(function (CouponUser $couponUser) use ($coupons) {
-      $coupon = $coupons->get($couponUser->coupon_id);
-      return $coupon->discount; 
-    });
-
-    // 8-9 如果用户选了优惠券 判断下是否可以使用 
-    $couponPrice = 0;
-    if (is_null($couponIds) || $couponId == -1) {
+    if (is_null($couponUser)) {
       $couponId = -1;
       $userCouponId = -1;
-    } else if ($couponId == 0) {
-      $couponUser = $couponUsers->first();
+      // $couponUser = 0;
+      $couponPrice = 0;
+    } else {
       $couponId = $couponUser->coupon_id ?? 0;
       $userCouponId = $couponUser->id ?? 0;
       $couponPrice = CouponServices::getInstance()->getCoupon($couponId)->discount ?? 0; 
-    } else {
-      $coupon = CouponServices::getInstance()->getCoupon($couponId); 
-      $couponUser = CouponServices::getInstance()->getCouponUser($userCouponId); 
-      $is = CouponServices::getInstance()->checkCouponAndPrice($coupon, $couponUser, $checkedGoodsPrice); 
-      if ($is) {
-        $couponPrice = $coupon->discount ?? 0; 
-      }
     } 
+      
+    // if (empty($cartId))  {
+    //   $checkedGoodsList = CartServices::getInstance()->getCheckedCartList(
+    //     // $this->userId()
+    //     DEF_ID
+    //   ); 
+    // } else {
+    //   $cart = CartServices::getInstance()->getCartById(
+    //     // $this->userId()
+    //     DEF_ID,
+    //     $cartId
+    //   ); 
+    //   if (empty($cart)) {
+    //     return $this->badArgumentValue(); 
+    //   }
+    //   $checkedGoodsList = collect([$cart]);// getCheckedCartList 返回一个集合 所以 也需要使用 collect 包裹一下
+    // } 
+
+
+    // f cart) {
+    //   if ($grouponRuless && $grouponRuless->goods_id == $cart->goods_id) {
+    //     $price = bcsub($cart->price, $grouponRuless->discount, 2);
+    //     $grouponPrice = bcmul($grouponRuless->discount, $cart->number, 2);
+    //   } else {
+    //     $price = $cart->price;
+    //   }
+    //   $price = bcmul($price, $cart->number, 2);
+    //   $checkedGoodsPrice = bcadd($checkedGoodsPrice, $price, 2);
+    // }
+
+
+    // // 8-10  
+
+    // // 获取合适当前价格的优惠券列表  并根据优惠折扣进行降序排序
+    // $couponUsers = CouponServices::getInstance()->getUsableCoupons(
+    //   // $this->userId()
+    //   DEF_ID
+    // );
+    // $couponIds = $couponUsers->pluck('coupon_id')->toArray();
+    // $coupons = CouponServices::getInstance()->getCoupon($couponIds);
+
+    // $couponUsers->filter(function (CouponUser $couponUser) use ($coupons, $checkedGoodsPrice) {
+    //   $coupon = $coupons->get($couponUser->coupon_id);
+
+    //   return CouponServices::getInstance()->checkCouponAndPrice(
+    //     $coupon, 
+    //     $couponUser, 
+    //     $checkedGoodsPrice
+    //   ); 
+    // })
+    // ->sortByDesc(function (CouponUser $couponUser) use ($coupons) {
+    //   $coupon = $coupons->get($couponUser->coupon_id);
+    //   return $coupon->discount; 
+    // });
+
+    // // 8-9 如果用户选了优惠券 判断下是否可以使用 
+    // $couponPrice = 0;
+    // if (is_null($couponId) || $couponId == -1) {
+    //   $couponId = -1;
+    //   $userCouponId = -1;
+    // } else if ($couponId == 0) {
+    //   $couponUser = $couponUsers->first();
+    //   $couponId = $couponUser->coupon_id ?? 0;
+    //   $userCouponId = $couponUser->id ?? 0;
+    //   $couponPrice = CouponServices::getInstance()->getCoupon($couponId)->discount ?? 0; 
+    // } else {
+    //   $coupon = CouponServices::getInstance()->getCoupon($couponId); 
+    //   $couponUser = CouponServices::getInstance()->getCouponUser($userCouponId); 
+    //   $is = CouponServices::getInstance()->checkCouponAndPrice($coupon, $couponUser, $checkedGoodsPrice); 
+    //   if ($is) {
+    //     $couponPrice = $coupon->discount ?? 0; 
+    //   }
+    // } 
 
     $freighPrice = 0;// 运费
     $freighMin = SystemServices::getInstance()->getFreighMin(); 
@@ -358,7 +403,8 @@ class CartController extends WxController
       'grouponRulesId' => $grouponRulesId,
       'grouponPrice' => $grouponPrice,
       'checkedAddress' => $address->toArray(),
-      'availableCouponLength' => $couponUsers->count(),
+      // 'availableCouponLength' => $couponUsers->count(),
+      'availableCouponLength' => $availableCouponLength,// 解决 Undefined variable '$couponUsers'
       'goodsTotalPrice' => $checkedGoodsPrice,
       'freighPrice' => $freighPrice,
       'couponPrice' => $couponPrice,

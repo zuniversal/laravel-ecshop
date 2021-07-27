@@ -17,6 +17,7 @@ use App\Models\Promotion\GrouponRules;
 use App\Models\User\Address;
 use App\Services\BaseServices;
 use App\Services\Goods\GoodsServices;
+use App\Services\Promotion\CouponServices;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
@@ -178,10 +179,24 @@ class CartServices extends BaseServices
     Cart::query()->where('id', $ids)->delete();
   }
   // 8-8
-  public function getCheckedCartList($userId) {// 
+  // public function getCheckedCartList($userId) {// 
+  public function getCheckedCarts($userId) {// 8-10
     return Cart::query()
       ->where('user_id', $userId)
       ->where('checked', 1)
       ->get();
+  }
+  // 8-10 获取已选择的购物车商品列表
+  public function getCheckedCartList($userId, $cartId) {// 
+      if (empty($cartId)) {
+          $checkedGoodsList = $this->getCheckedCarts($userId, $cartId);  
+      } else {
+          $cart = $this->getCartById($userId, $cartId);  
+          if (empty($cart)) {
+              $this->throwBadArgumentValue();
+          } 
+          $checkedGoodsList = collect([$cart]);
+      } 
+      return $checkedGoodsList; 
   }
 }

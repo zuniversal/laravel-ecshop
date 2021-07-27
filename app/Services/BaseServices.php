@@ -2,6 +2,7 @@
 // 5-8  php artisan test 全部的测试都可以跑跑一遍 
 namespace App\Services;
 
+use App\CodeResponse;
 use App\Exceptions\BussniessException;
 
 // 单例模式 为类提供一种访问类唯一对象的方式 
@@ -44,5 +45,9 @@ class BaseServices
         throw new BussniessException($codeResponse,
             $info
         );
+    }
+    // 8-10
+    public function throwBadArgumentValue() {// 
+        throw new BussniessException(CodeResponse::PARAM_VALUE_ILLEGAL);
     }
 }

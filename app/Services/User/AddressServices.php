@@ -39,4 +39,16 @@ class AddressServices extends BaseServices
         ->where('is_default', 1)
         ->first();
     }
+    // 8-10 获取地址或返回默认地址
+    public function getAddressOrDefault($userId, $addressId = null) {
+        if ($addressId) {
+            $address = AddressServices::getInstance()->getDefaultAddress($userId); 
+        } else {
+            $address = AddressServices::getInstance()->getAddress($userId, $addressId); 
+            if (empty($address)) {
+                return $this->throwBadArgumentValue(); 
+            }
+        }
+      return $address;
+    }
 }

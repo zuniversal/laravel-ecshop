@@ -192,7 +192,80 @@ class CouponServices extends BaseServices
         return true;
     }
     // 8-9
-    public function getCouponUser($id, $columns = ['*']) {
-        return CouponUser::query()->find($id, $columns);
+    public function getCouponUser($userId, $couponId) {
+        return CouponUser::query()
+        ->where('user_id', $userId)// 
+        ->where('coupon_id', $couponId)// 
+        ->first();
     }
+    // 8-10
+    public function getCouponUserByCouponId($userId, $couponId) {
+        return CouponUser::query()
+            ->where('user_id', $userId)// 
+            ->where('status', GrouponUserEnums::STATUS_USABLE)
+            ->get();
+    }
+    // 提取方法
+    public function getMeetPriceCouponAndCount($userId, $price) {// 
+        // 获取合适当前价格的优惠券列表  并根据优惠折扣进行降序排序
+        $couponUsers = CouponServices::getInstance()->getUsableCoupons(
+            // $this->userId()
+            DEF_ID
+        );
+        $couponIds = $couponUsers->pluck('coupon_id')->toArray();
+        $coupons = CouponServices::getInstance()->getCoupon($couponIds)->keyBy('id');
+
+        $res = $couponUsers->filter(function (CouponUser $couponUser) use ($coupons, $price) {
+            $coupon = $coupons->get($couponUser->coupon_id);
+
+            // dd($coupon);
+            return CouponServices::getInstance()->checkCouponAndPrice(
+                $coupon, 
+                $couponUser, 
+                $price
+            ); 
+        })
+        ->sortByDesc(function (CouponUser $couponUser) use ($coupons) {
+            $coupon = $coupons->get($couponUser->coupon_id);
+            return $coupon->discount; 
+        }); 
+        
+        // dd(
+        //     $couponUsers,
+        //     $couponIds,
+        //     $coupons
+        // );
+        return $res; 
+    }
+    public function getMostMeetPriceCoupon($userId, $couponId, 
+        // $userCouponId, 
+        $price, &$availableCouponLength = 0) {// /
+
+        $couponUsers = $this->getMeetPriceCouponAndCount($userId, $price);
+        $availableCouponLength = $couponUsers->count();
+        // dd($availableCouponLength);
+
+        // 卫语句写法 能提前 return 的提取 返回
+        if (is_null($couponId) || $couponId == -1) {
+            return null; 
+        } 
+
+        // 8-9 提取 如果用户选了优惠券 判断下是否可以使用 
+        $couponPrice = 0;
+        // if (is_null($couponIds) || $couponId == -1) {
+        //   $couponId = -1;
+        //   $userCouponId = -1;
+        // } else if ($couponId == 0) {
+        if (!empty($couponId)) {
+        $coupon = $this->getCoupon($couponId); 
+        // $couponUser = $this->getCouponUser($userCouponId); 
+        $couponUser = $this->getCouponUser($userId, $couponId); 
+        $is = $this->checkCouponAndPrice($coupon, $couponUser, $price); 
+        if ($is) {
+            return $couponUser; 
+        }
+        } 
+        return $couponUsers->first();
+    }
+
 }
