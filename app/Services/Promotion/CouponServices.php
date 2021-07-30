@@ -191,11 +191,16 @@ class CouponServices extends BaseServices
         }
         return true;
     }
-    // 8-9
-    public function getCouponUser($userId, $couponId) {
+    // // 8-9
+    // public function getCouponUser($userId, $couponId) {
+    //     return CouponUser::query()
+    //     ->where('user_id', $userId)// 
+    //     ->where('coupon_id', $couponId)// 
+    //     ->first();
+    // }
+    public function getCouponUser($userId) {
         return CouponUser::query()
         ->where('user_id', $userId)// 
-        ->where('coupon_id', $couponId)// 
         ->first();
     }
     // 8-10
@@ -259,7 +264,7 @@ class CouponServices extends BaseServices
         if (!empty($couponId)) {
         $coupon = $this->getCoupon($couponId); 
         // $couponUser = $this->getCouponUser($userCouponId); 
-        $couponUser = $this->getCouponUser($userId, $couponId); 
+        $couponUser = $this->getCouponUserByCouponId($userId, $couponId); 
         $is = $this->checkCouponAndPrice($coupon, $couponUser, $price); 
         if ($is) {
             return $couponUser; 

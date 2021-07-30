@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 // 数据表的拆分 所以前期可以评估是否做拆分 - 即 技术判断力 包含： 编码 设计 业务理解 经验  架构师 是不断积累的过程 涉及很多因素
 
 
+// 8-10 复杂场景单元测试的前提是每个方法都进行好的抽象  才鞥呢在它的基础上做好单元测试
+
 
 
 // 6-1
@@ -75,3 +77,13 @@ Route::any('cart/delete', 'CartController@delete'); // 删除购物车的商品
 Route::any('cart/checked', 'CartController@checked'); // 选择或取消选择商品
 Route::any('cart/checkout', 'CartController@checkout'); // 下单前信息确认
 
+// 8-11
+Route::any('order/submit', 'OrderController@submit'); //提交订单
+Route::any('order/prepay', 'OrderController@prepay'); //订单的预支付会话
+Route::any('order/h5pay', 'OrderController@h5pay'); // h5支付
+Route::any('order/list', 'OrderController@list'); //订单列表
+Route::any('order/detail', 'OrderController@detail'); //订单详情
+Route::any('order/cancel', 'OrderController@cancel'); //取消订单
+Route::any('order/refund', 'OrderController@refund'); //退款取消订单
+Route::any('order/delete', 'OrderController@delete'); //删除订单
+Route::any('order/confirm', 'OrderController@confirm'); //确认收货

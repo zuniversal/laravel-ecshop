@@ -90,7 +90,7 @@ class CouponController extends WxController
     // 7-4
     public function receive() {// 
         $couponId = $this->verifyId('coupon_id', 0);
-        $data =  CouponServices::getInstance()->receive(
+        $data = CouponServices::getInstance()->receive(
             // $this->userId(),
             DEF_ID,
             $couponId

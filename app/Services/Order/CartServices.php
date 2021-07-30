@@ -18,6 +18,7 @@ use App\Models\User\Address;
 use App\Services\BaseServices;
 use App\Services\Goods\GoodsServices;
 use App\Services\Promotion\CouponServices;
+use App\Services\Promotion\GrouponServices;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
@@ -186,17 +187,48 @@ class CartServices extends BaseServices
       ->where('checked', 1)
       ->get();
   }
-  // 8-10 获取已选择的购物车商品列表
-  public function getCheckedCartList($userId, $cartId) {// 
-      if (empty($cartId)) {
-          $checkedGoodsList = $this->getCheckedCarts($userId, $cartId);  
+  // 8-10 提取
+  public function getCartPriceCutGroupon($checkedGoodsList, $grouponRulesId, &$grouponPrice = 0) {// 
+    $grouponRuless = GrouponServices::getInstance()->getGrouponRulesById($grouponRulesId);
+    $checkedGoodsPrice = 0;// 总价格
+    // $grouponPrice = 0;
+    foreach ($checkedGoodsList as $cart) {
+      if ($grouponRuless && $grouponRuless->goods_id == $cart->goods_id) {
+        $grouponPrice = bcmul($grouponRuless->discount, $cart->number, 2);
+        $price = bcsub($cart->price, $grouponRuless->discount, 2);
       } else {
-          $cart = $this->getCartById($userId, $cartId);  
-          if (empty($cart)) {
-              $this->throwBadArgumentValue();
-          } 
-          $checkedGoodsList = collect([$cart]);
-      } 
-      return $checkedGoodsList; 
+        $price = $cart->price;
+      }
+      $price = bcmul($price, $cart->number, 2);
+      $checkedGoodsPrice = bcadd($checkedGoodsPrice, $price, 2);
+    }
+    return $checkedGoodsPrice;
   }
+  // 8-10 获取已选择的购物车商品列表
+  public function getCheckedCartList($userId, $cartId = null) {// 
+    if (empty($cartId)) {
+      $checkedGoodsList = $this->getCheckedCarts($userId, $cartId);  
+    } else {
+      $cart = $this->getCartById($userId, $cartId);  
+      if (empty($cart)) {
+          $this->throwBadArgumentValue();
+      } 
+      $checkedGoodsList = collect([$cart]);
+    } 
+    return $checkedGoodsList; 
+  }
+  // 8-11
+  public function clearCartGoods($userId, $cartId = null) {// 
+    if (empty($cartId)) {
+      return Cart::query()
+        ->where('user_id', $userId)
+        ->where('checked', 1)
+        ->delete();
+    }
+    return Cart::query()
+      ->where('user_id', $userId)
+      ->where('id', $cartId)
+      ->delete();
+  }
+
 }

@@ -12,6 +12,7 @@ use App\Models\Promotion\CouponUser;
 use App\Models\Promotion\GrouponRules;
 use App\Services\Goods\GoodsServices;
 use App\Services\Order\CartServices;
+use App\Services\Order\OrderServices;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Query\Builder;
@@ -275,19 +276,24 @@ class CartController extends WxController
     // } 
     
     $grouponRuless = GrouponServices::getInstance()->getGrouponRulesById($grouponRulesId);
-    $checkedGoodsPrice = 0;// 总价格
+    // $checkedGoodsPrice = 0;// 总价格
     $grouponPrice = 0;
 
-    
-    // 获取购物车的商品列表
 
     // 8-10
     // 计算订单总金额
+    
+    // 获取购物车的商品列表
     $checkedGoodsList = CartServices::getInstance()->getCheckedCartList(
       // $this->userId()
       DEF_ID,
       $cartId
     ); 
+    $checkedGoodsPrice = CartServices::getInstance()->getCartPriceCutGroupon(
+      $checkedGoodsList,
+      $grouponRulesId, 
+      $grouponPrice
+    );// 总价格
     $availableCouponLength = 0;// 获取优惠券信息
 
     // 获取优惠券信息
@@ -384,12 +390,18 @@ class CartController extends WxController
     //   }
     // } 
 
-    $freighPrice = 0;// 运费
-    $freighMin = SystemServices::getInstance()->getFreighMin(); 
-    // 商品金额小于运费金额
-    if (bccomp($freighMin, $checkedGoodsPrice) === 1) {
-      $freighPrice = SystemServices::getInstance()->getFreighValue(); 
-    }
+
+    // $freighPrice = 0;// 运费
+    // $freighMin = SystemServices::getInstance()->getFreighMin(); 
+    // // 商品金额小于运费金额
+    // if (bccomp($freighMin, $checkedGoodsPrice) === 1) {
+    //   $freighPrice = SystemServices::getInstance()->getFreighValue(); 
+    // }
+    
+    // 8-11
+    $freighPrice = OrderServices::getInstance()->getFreight($checkedGoodsPrice); 
+
+
     // 计算订单金额
     $orderPrice = bcadd($checkedGoodsPrice, $freighPrice, 2);
     $orderPrice = bcsub($orderPrice, $couponPrice, 2);
