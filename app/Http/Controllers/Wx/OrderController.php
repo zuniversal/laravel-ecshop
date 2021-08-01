@@ -39,6 +39,18 @@ class OrderController extends WxController
   // 提交订单
   public function submit() {// 
     $input = OrderSubmitInput::new();
+
+    // 8-13
+    $lockKey = sprintf('order_submit_%_%'.
+    // $this->userId().
+    DEF_ID.
+    md5(serialize($input))
+  );
+    $lock = Cache::lock($lockKey, 5);
+    if (!$lock->get()) {
+      return $this->fail(CodeResponse::FAIL, '请勿重复请求！'); 
+    }
+
     $order = DB::transaction(function () use ($input) {
       return OrderServices::getInstance()->submit(
         // $this->userId(),

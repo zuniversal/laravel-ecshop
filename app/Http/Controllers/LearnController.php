@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\Benchmark;
+use App\Inputs\OrderSubmitInput;
 use App\Models\Goods\Goods;
 use App\Models\Goods\GoodsProduct;
 use App\Models\Product;
 use App\Models\User\User;
+use App\Services\Order\CartServices;
+use App\Services\Order\OrderServices;
 use App\Services\Promotion\GrouponServices;
 use Exception;
 use Illuminate\Database\Query\Builder;
@@ -15,6 +18,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
+const DEF_ID = 1;
 // 注意 控制器名需要与文件名一致 不然框架加载不了 报错 类无法找到
 class LearnController extends Controller
 {
@@ -546,6 +550,47 @@ class LearnController extends Controller
 
     // 7-17
     function test() {
+        // $order->refresh() 通过id刷新获取一下数据
+        // 分布式系统里经常涉及 幂等性 词 
+        // 对数据加锁的 去诶单是 对 读多写少的场景 排斥 
+        // redis 锁是分布式锁 在分布式系统里经常用到它 
+
+        // 减库存主要解决两个问题
+        // 1.并发问题
+        // ●不同用户同时提交订单，对同一个货品的库存进行操作。
+        // ●需要解决的是数据一致性问题
+        // 2.重复请求问题
+        // ●同一个用户，由于网络或者其他原因， 导致短时间发送多个同-一个提交订单的请求。
+        // ●需要解决的是幂等性问题
+        // 舞等性:对同一个系统，使用同样的条件，- 次请求和重复的多次请求对系统资源的影响是一致的
+        
+
+        $checkedGoodsList = CartServices::getInstance()->getCheckedCartList(
+            // $this->user->id,
+            DEF_ID
+        );
+        // dd($checkedGoodsList);
+        OrderServices::getInstance()->reduceProductStock($checkedGoodsList);
+
+        return $checkedGoodsList;// 
+
+
+        // 8-13
+        $input = OrderSubmitInput::new([
+            // 'addressId' => $address->id,
+            'addressId' => 1,
+            'cartId' => 0,
+            // 'grouponRulesId' => $rulesId,
+            'grouponRulesId' => 1,
+        ]);
+        $resp = OrderServices::getInstance()->submit(
+            // $this->user->id,
+            DEF_ID,
+            $input
+        );
+
+        return $resp;// 
+
         // 7-15 注意 如果没有给一个header 头 访问路由会发现是一堆乱码 浏览器认不出是图片 直接解析成文本了
         $rules = GrouponServices::getInstance()->getGrouponRulesById(1);
         // dd($rules);// 

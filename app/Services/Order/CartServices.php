@@ -182,6 +182,7 @@ class CartServices extends BaseServices
   // 8-8
   // public function getCheckedCartList($userId) {// 
   public function getCheckedCarts($userId) {// 8-10
+    // dd($userId);
     return Cart::query()
       ->where('user_id', $userId)
       ->where('checked', 1)
@@ -207,11 +208,11 @@ class CartServices extends BaseServices
   // 8-10 获取已选择的购物车商品列表
   public function getCheckedCartList($userId, $cartId = null) {// 
     if (empty($cartId)) {
-      $checkedGoodsList = $this->getCheckedCarts($userId, $cartId);  
+      $checkedGoodsList = $this->getCheckedCarts($userId);  
     } else {
       $cart = $this->getCartById($userId, $cartId);  
       if (empty($cart)) {
-          $this->throwBadArgumentValue();
+        $this->throwBadArgumentValue();
       } 
       $checkedGoodsList = collect([$cart]);
     } 

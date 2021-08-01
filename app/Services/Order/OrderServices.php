@@ -27,6 +27,7 @@ use App\Services\User\AddressServices;
 use App\SystemServices;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\AbstractFont;
@@ -37,6 +38,7 @@ class OrderServices extends BaseServices
 {
   public function submit($userId, OrderSubmitInput $input) {
     // 验证团购规则的有效性
+    // var_dump('  ===================== ');// 
     if (!empty($input->grouponRulesId)) {
       GrouponServices::getInstance()->checkGrouponValid(
         $userId,
@@ -47,6 +49,7 @@ class OrderServices extends BaseServices
       $userId,
       $input->addressId
     );
+    // dd($address);
     if (empty($address)) {
       return $this->throwBadArgumentValue(); 
     }
@@ -98,9 +101,11 @@ class OrderServices extends BaseServices
     $order->consignee = $address->name;
     $order->mobile = $address->tel;
     $order->address = $address->province.$address->city.$address->country.' '.$address->address_detail;
-    $order->message = $input->message;
+    // $order->message = $input->message;
+    $order->message = '信息';
     $order->goods_price = $checkedGoodsPrice;
     $order->freight_price = $freightPrice;
+    $order->integral_price = 0;// 8-12
     $order->coupon_price = $couponPrice;
     $order->order_price = $orderTotalPrice;
     $order->actual_price = $orderTotalPrice;
@@ -117,11 +122,16 @@ class OrderServices extends BaseServices
     $this->reduceProductStock($checkedGoodsList);
     
     // 添加团购记录
-    GrouponServices::getInstance()->openOrJoinGroupon($userId, $order->id, $input->cartId); 
+    GrouponServices::getInstance()->openOrJoinGroupon(
+      $userId, 
+      $order->id, 
+      $input->grouponRulesId,
+      $input->grouponLinkId
+    ); 
     
     // 设置订单超时任务
 
-
+    return $order;// 8-12 
   }
   
   // 获取运费
@@ -137,7 +147,7 @@ class OrderServices extends BaseServices
   public function isOrderSnUsed($orderSn) {// 
     return Order::query()
       ->where('order_sn', $orderSn)
-      ->exist();
+      ->exists();
   }
   // 生成订单编号
   public function generateOrderSn() {// 
@@ -148,7 +158,7 @@ class OrderServices extends BaseServices
       if (!$this->isOrderSnUsed($orderSn)) {
         return $orderSn; 
       }
-      \Log::warning('订单号获取失败 订单号： '.$orderSn);
+      Log::warning('订单号获取失败 订单号： '.$orderSn);
       $this->throwBussniessException(CodeResponse::FAIL, '订单号获取失败！');
     });
   }
@@ -163,11 +173,34 @@ class OrderServices extends BaseServices
       $orderGoods->pic_url = $cart->pic_url;
       $orderGoods->price = $cart->price;
       $orderGoods->number = $cart->number;
+      $orderGoods->specifications = $cart->specifications;
       $orderGoods->save();
     }
   }
   public function reduceProductStock($goodsList) {// 
-    
-    
+    // $productIds = $goodsList->pluck('product_id')->toArray();
+    $productIds = [
+      1166008,
+      1181005,
+    ];
+    $products = GoodsServices::getInstance()->getGoodsProductByIds($productIds)->keyBy('id'); 
+    // dd($products);
+
+    foreach ($goodsList as $cart) {
+      // dd($cart);
+      $product = $products->get($cart->product_id);
+      // dd($product);
+      if (empty($product)) {
+        $this->throwBussniessException(CodeResponse::GOODS_NO_STOCK);
+      }
+      if ($product->number < $cart->number) {
+        $this->throwBussniessException(CodeResponse::GOODS_NO_STOCK);
+      }
+      $row = SystemServices::getInstance()->getFreighValue(); 
+      // dd($row);
+      if ($row == 0) {
+        $this->throwBussniessException(CodeResponse::GOODS_NO_STOCK);
+      }
+    }
   }
 }

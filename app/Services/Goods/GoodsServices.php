@@ -160,5 +160,20 @@ class GoodsServices extends BaseServices
     public function getGoodsProductById(int $id) {// 
         return GoodsProduct::query()->find($id);
     }
-    
+    // 8-13
+    public function reduceStock($productid, $num) {// 
+        return GoodsProduct::query()
+            ->where('id', $productid)
+            ->where('number', '>=', $num)
+            ->decrement('number', $num);
+    }
+    public function getGoodsProductByIds(array $ids) {// 
+        if (empty($ids)) {
+            return collect();
+        }
+        
+        return GoodsProduct::query()
+            ->whereIn('goods_id', $ids)
+            ->get();
+    }
 }

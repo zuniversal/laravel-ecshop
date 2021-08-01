@@ -7,6 +7,7 @@ use App\Models\Goods\Goods;
 use App\Models\Goods\GoodsProduct;
 use App\Models\Goods\GoodsSpecification;
 use App\Models\Promotion\GrouponRules;
+use App\Models\User\Address;
 use App\Models\User\User;
 use App\Services\Goods\GoodsServices;
 use Faker\Generator as Faker;
@@ -84,4 +85,20 @@ $factory->state(GoodsProduct::class, 'groupon', function (Faker $faker) {
         'goods_id' => $goods->pic_url,
         'discount' => 1,
     ]);
+});
+
+// 8-12
+$factory->define(Address::class, function (Faker $faker) {
+    return [
+        'name' => $faker->name,
+        'user_id' => 0,
+        'province' => '浙江省',
+        'city' => '杭州市',
+        'county' => '西湖区',
+        'address_detail' => $faker->streetAddress,
+        'area_code' => '',
+        'postal_code' => $faker->postcode,
+        'tel' => $faker->phoneNumber,
+        'is_default' => 0
+    ];
 });

@@ -20,6 +20,8 @@ class OrderGoods extends BaseModel
   ];
 
   protected $casts = [
+    // 8-12 
+      'specifications' => 'array',
       
   ];
 }

@@ -17,9 +17,12 @@ class OrderSubmitInput extends Input
 
     public function rules() {// 
         return [
-            'cartId' => 'required|integer',
-            'addressId' => 'required|integer',
-            'couponId' => 'required|integer',
+            // 'cartId' => 'required|integer',
+            // 'addressId' => 'required|integer',
+            // 'couponId' => 'required|integer',
+            'cartId' => 'integer',
+            'addressId' => 'integer',
+            'couponId' => 'integer',
             'userCouponId' => 'integer',
             'message' => 'string',
             'grouponRulesId' => 'integer',
