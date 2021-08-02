@@ -9,6 +9,7 @@ use App\Enums\OrderEnums;
 use App\Facades\Product;
 use App\Inputs\OrderSubmitInput;
 use App\Inputs\PageInput;
+use App\Jobs\OrderUnpaidTimeEndJob;
 use App\Models\Order\Cart;
 use App\Models\Goods\Goods;
 use App\Models\Goods\GoodsProduct;
@@ -130,6 +131,9 @@ class OrderServices extends BaseServices
     ); 
     
     // 设置订单超时任务
+    // 8-14 
+    // php artisan make:job OrderUnpaidTimeEndJob
+    dispatch(new OrderUnpaidTimeEndJob($userId, $order->id));
 
     return $order;// 8-12 
   }
@@ -202,5 +206,10 @@ class OrderServices extends BaseServices
         $this->throwBussniessException(CodeResponse::GOODS_NO_STOCK);
       }
     }
+  }
+  // 8-14
+  public function cancel($userId, $orderId) {// 
+    var_dump(' cancel ===================== ');// 
+    return ; 
   }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Middleware\Benchmark;
 use App\Inputs\OrderSubmitInput;
+use App\Jobs\OrderUnpaidTimeEndJob;
 use App\Models\Goods\Goods;
 use App\Models\Goods\GoodsProduct;
 use App\Models\Product;
@@ -550,6 +551,9 @@ class LearnController extends Controller
 
     // 7-17
     function test() {
+        // 8-14
+        dispatch(new OrderUnpaidTimeEndJob(1, 2));
+        return; 
         // $order->refresh() 通过id刷新获取一下数据
         // 分布式系统里经常涉及 幂等性 词 
         // 对数据加锁的 去诶单是 对 读多写少的场景 排斥 

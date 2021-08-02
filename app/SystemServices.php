@@ -48,4 +48,8 @@ class SystemServices extends BaseServices
     public function getFreighMin() {// 
         return (double) $this->get(self::LITEMALL_EXPRESS_FREIGHT_MIN);
     }
+    // 8-14
+    public function getOrderUnpaidDelayMinutes() {// 
+        return (int) $this->get(self::LITEMALL_ORDER_UNPAID);
+    }
 }
