@@ -176,4 +176,15 @@ class GoodsServices extends BaseServices
             ->whereIn('goods_id', $ids)
             ->get();
     }
+    // 8-16
+    public function addStock($productid, $num) {// 
+        // return GoodsProduct::query()
+        //     ->where('product_id', $productid)
+        //     ->increment('number', $num);
+
+        // 乐观锁
+        $product = $this->getGoodsProductById($productid);
+        $product->number = $product->number + $num;
+        return $product->cas(); 
+    }
 }

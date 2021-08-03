@@ -76,4 +76,24 @@ class BaseModel extends Model
     public function getTable() {// 
         return $this->table ?? Str::snake(class_basename($this));
     }
+    // 8-16 乐观锁更新
+    public function cas() {// 
+        // 获取对象里哪些值被修改过的值
+        // 因为 比如 修改一个查询实例对象的属性 但是没有 save() 前 数据库的值还是原来的
+        $dirty = $this->getDirty();
+        // dd($dirty);
+        $updateAt = $this->getUpdatedAtColumn();
+        // dd($updateAt);
+        $query = self::query()
+            ->where($this->getKeyName(), $this->getKey())
+            ->where($updateAt, $this->{$updateAt}); 
+        // dd($query);
+        
+        // 拼装where条件
+        foreach ($dirty as $key => $value) {
+            // dd($key);
+            $query = $query->where($key, $this->getOriginal($key));
+        }
+        return $query->update($dirty);
+    }
 }

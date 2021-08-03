@@ -551,6 +551,16 @@ class LearnController extends Controller
 
     // 7-17
     function test() {
+        // 8-16
+        // $order = $this->getOrder();
+        OrderServices::getInstance()->userCancel(
+            // $this->user->id,
+            DEF_ID,
+            // $order->id,
+            10
+        );
+
+        return 666; 
         // 8-14
         dispatch(new OrderUnpaidTimeEndJob(1, 2));
         return; 

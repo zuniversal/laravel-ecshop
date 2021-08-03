@@ -28,6 +28,7 @@ use App\Services\User\AddressServices;
 use App\SystemServices;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -195,7 +196,9 @@ class OrderServices extends BaseServices
       $product = $products->get($cart->product_id);
       // dd($product);
       if (empty($product)) {
-        $this->throwBussniessException(CodeResponse::GOODS_NO_STOCK);
+        $this->throwBussniessException(
+          CodeResponse::GOODS_NO_STOCK
+        );
       }
       if ($product->number < $cart->number) {
         $this->throwBussniessException(CodeResponse::GOODS_NO_STOCK);
@@ -208,8 +211,80 @@ class OrderServices extends BaseServices
     }
   }
   // 8-14
-  public function cancel($userId, $orderId) {// 
-    var_dump(' cancel ===================== ');// 
-    return ; 
+  // public function cancel($userId, $orderId) {// 
+  //   var_dump(' cancel ===================== ');// 
+  //   return ; 
+  // }
+  // 8-15
+  // 有限状态机  有限是说 不描述的状态数量是有限的  事物运行规则抽象的一个对象模型 
+  // 有限状态机4要素：  初态 终态 事件 动作
+
+  // 在线流程图
+  // https://www.processon.com/diagrams
+
+  // 8-16
+  public function getOrderByUserIdAndId($userId, $orderId) {
+    return Order::query()
+      ->where('user_id', $userId)
+      ->find($orderId);
+  }
+  public function userCancel($userId, $orderId) {// 
+    \DB::transaction(function () use($userId, $orderId) {
+      $this->cancel($userId, $orderId, 'user'); 
+    });
+  }
+  public function systemCancel($userId, $orderId) {// 
+    \DB::transaction(function () use($userId, $orderId) {
+      $this->cancel($userId, $orderId, 'system'); 
+    });
+  }
+  public function adminCancel($userId, $orderId) {// 
+    \DB::transaction(function () use($userId, $orderId) {
+      $this->cancel($userId, $orderId, 'admin');  
+    });
+  }
+  public function getOrderGoodsList($orderId) {
+    return OrderGoods::query()
+      ->where('order_id', $orderId)
+      ->get();
+  }
+  public function cancel($userId, $orderId, $role = 'user') {// 
+    $order = $this->getOrderByUserIdAndId($userId, $orderId);
+    if (is_null($order)) {
+      $this->throwBussniessException(
+        CodeResponse::GOODS_NO_STOCK
+      );
+    }
+    if ($order->canCancelHandle) {
+      $this->throwBussniessException(CodeResponse::ORDER_INVALID_OPERATION, '订单不能取消');
+    }
+    switch ($role) {
+      case 'system':
+        $order->order_status = OrderEnums::STATUS_AUTO_CANCEL;
+        break;
+      case 'admin':
+        $order->order_status = OrderEnums::STATUS_ADMIN_CANCEL;
+        break;
+      default:
+        $order->order_status = OrderEnums::STATUS_CANCEL;
+        break;
+    }
+    // dd($order->cas());
+    // 调用 封装在 BaseModel 里的cas 方法
+    if ($order->cas() == 0) {
+      $this->throwBussniessException(CodeResponse::UPDATED_FAIL);
+    }
+    $orderGoods = $this->getOrderGoodsList($orderId);
+    // dd($orderGoods);
+    
+    foreach ($orderGoods as $goods) {
+      $row = GoodsServices::getInstance()->addStock($goods->product_id, $goods->number); 
+      if ($row == 0) {
+        $this->throwBussniessException(
+          CodeResponse::GOODS_NO_STOCK
+        );
+      }
+    }
+    return true; 
   }
 }

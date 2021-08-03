@@ -6,6 +6,7 @@
 // 业务里 可以推送一些 job 到队列里 然后 满足条件的会被 worker 轮询到然后 异步的执行
 namespace App\Jobs;
 
+use App\Exceptions\BussniessException;
 use App\Services\Order\OrderServices;
 use App\SystemServices;
 use Illuminate\Bus\Queueable;
@@ -59,9 +60,13 @@ class OrderUnpaidTimeEndJob implements ShouldQueue
     public function handle()
     {
         var_dump(' handle ===================== ');// 
-        OrderServices::getInstance()->cancel(
-            $this->userId,
-            $this->orderId
-        ); 
+        try {
+            OrderServices::getInstance()->cancel(
+                $this->userId,
+                $this->orderId
+            ); 
+        } catch (BussniessException $exception) {
+            //throw $th;
+        }
     }
 }
