@@ -75,5 +75,10 @@ class DBSqlListener
             'sql' => $sql,
             'time' => $time,
         ]);
+
+        // 8-17
+        // if (app()->envronment(['testing'])) {
+            echo $sql.PHP_EOL;// PHP_EOL 表示换行
+        // }
     }
 }

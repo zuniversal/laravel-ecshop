@@ -78,15 +78,45 @@ class BaseModel extends Model
     }
     // 8-16 乐观锁更新
     public function cas() {// 
+        // 8-17 如下2种 效果一样
+        // if (!$this->exists) {
+        //     throw new \Exception('模型cas方法不存在');
+        // }
+        throw_if($this->exists, \Exception::class, '模型cas方法不存在');
+
         // 获取对象里哪些值被修改过的值
         // 因为 比如 修改一个查询实例对象的属性 但是没有 save() 前 数据库的值还是原来的
         $dirty = $this->getDirty();
+
+        // 8-18 可以在该方法里返回 布尔值 进行拦截
+        if ($this->filterModelEventResults('casing') === false) {
+            return false; 
+        }
+
+        // 8-17
+        $diff = array_diff(
+            array_keys($dirty),
+            array_keys($this->original)
+        );
+        throw_if($this->exists, \Exception::class, 'key'.implode(',', $diff).'不存在');
+
+        // 如果是更新时间戳的话
+        if ($this->usesTimestamps()) {
+            $this->updateTimestamps();// 加上时间戳字段
+            $dirty = $this->getDirty();
+        }
+
+
         // dd($dirty);
         $updateAt = $this->getUpdatedAtColumn();
         // dd($updateAt);
-        $query = self::query()
+
+        // $query = self::query()
+        // 8-17 不需要 `deleted` = 0  字段
+        $query = self::newModelQuery()
             ->where($this->getKeyName(), $this->getKey())
-            ->where($updateAt, $this->{$updateAt}); 
+            // ->where($updateAt, $this->{$updateAt})// 8-17 注释
+            ; 
         // dd($query);
         
         // 拼装where条件
@@ -94,6 +124,30 @@ class BaseModel extends Model
             // dd($key);
             $query = $query->where($key, $this->getOriginal($key));
         }
-        return $query->update($dirty);
+
+        // 8-18 如果更新成功
+        $row = $query->update($dirty);
+        if ($row > 0) {
+            $this->syncChanges();
+            $this->syncOriginal();
+
+            // 2个参数 意味着： 多个拦截事件里只要 user 模型里  多个回调里只要有一个拦截到 监听到结果 就终止 事件不继续往下传播
+            // xxx ed 方法之间不会有关系 是结束的时候 我们的方法不需要传播了 我们可能需要做一些通知操作 业务等 所以采用广播的方式
+            // 但是 xxx  ing 方法之间有关系 其中一个返回 true 就不会继续往下走
+            $this->filterModelEvent('cased', false);// 8-18 如果要更新user模型 在 user模型里监听
+        }
+
+        return $row;
+    }
+    // 复制 HasEvents 2个方法
+    public static function casing($callback)
+    {
+        var_dump(' casing ===================== ');// 
+        static::registerModelEvent('casing', $callback);
+    }
+    public static function cased($callback)
+    {
+        var_dump(' casing ===================== ');// 
+        static::registerModelEvent('cased', $callback);
     }
 }

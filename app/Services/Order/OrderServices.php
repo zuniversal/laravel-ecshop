@@ -269,6 +269,7 @@ class OrderServices extends BaseServices
         $order->order_status = OrderEnums::STATUS_CANCEL;
         break;
     }
+    // var_dump('  ===================== ');// 
     // dd($order->cas());
     // 调用 封装在 BaseModel 里的cas 方法
     if ($order->cas() == 0) {

@@ -551,6 +551,22 @@ class LearnController extends Controller
 
     // 7-17
     function test() {
+        // 8-17
+        $user = User::first(['id', 'username', 'nickname']);
+        $user->nickname = 'test';
+        // dd($user);
+        // $ret = $user->cas();
+
+        // 可以看到 数据里的  attributes   初始值数据 original  修改的改变数据 changes  
+        // 注意 对应的字段需要在 first 数组里列出才会出现在对象里
+
+        $ret = $user->save();
+        dd(
+            $user
+            // , $ret
+        );
+        return $ret; 
+
         // 8-16
         // $order = $this->getOrder();
         OrderServices::getInstance()->userCancel(

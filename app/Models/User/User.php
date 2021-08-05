@@ -51,5 +51,20 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
             'userId' => $this->getKey(),
         ];        
     }
-
+    // 8-18 重载一下 booted 方法  
+    protected static function booted() {// 
+        // parent::booted();
+        // 监听保存中 保存成功事件
+        // 如果要更新user模型 在 user模型里监听
+        static::casing(function ($user) {
+            // var_dump('casing', $user);// 
+            echo 'casing'.PHP_EOL;
+            // 可以在该方法里返回 布尔值 进行拦截
+            // return false;// 
+        });
+        static::cased(function ($user) {
+            // var_dump('cased', $user);// 
+            echo 'cased'.PHP_EOL;
+        });
+    }
 }
