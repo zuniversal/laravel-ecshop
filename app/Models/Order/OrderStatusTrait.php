@@ -6,9 +6,12 @@ use App\Enums\OrderEnums;
 
 trait OrderStatusTrait
 {
-  use OrderStatusTrait;
   
   public function canCancelHandle() {// 
+    return $this->order_status == OrderEnums::STATUS_CREATE; 
+  }
+  // 8-19
+  public function canPayHandle() {// 
     return $this->order_status == OrderEnums::STATUS_CREATE; 
   }
 }

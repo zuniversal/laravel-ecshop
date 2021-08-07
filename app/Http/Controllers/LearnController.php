@@ -53,9 +53,9 @@ class LearnController extends Controller
         $query = $request->query();
         $post = $request->post();
         return [
-            '$query' => $query,
-            '$post' => $post,
-            '$id' => $id,
+            'query' => $query,
+            'post' => $post,
+            'id' => $id,
             
         ];
 
@@ -551,6 +551,17 @@ class LearnController extends Controller
 
     // 7-17
     function test() {
+        // 8-19
+        // 注意 还需要 修改 laravel/phpunit.xml 的 <server name="MAIL_MAILER" value="array"/> 
+        // 为 smtp 否则会导致 邮件发不出去 并且 需要启动一个 worker 队列
+        $order = $this->getOrder()->refresh();
+        OrderServices::getInstance()->payOrder(
+            $order,
+            10
+        );
+        dd($order->refresh()->toArray());
+        return 666; 
+
         // 8-17
         $user = User::first(['id', 'username', 'nickname']);
         $user->nickname = 'test';

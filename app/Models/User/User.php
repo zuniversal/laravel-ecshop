@@ -67,4 +67,13 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
             echo 'cased'.PHP_EOL;
         });
     }
+    // 8-19 规则这么写 要知道这个方法是怎么被查找到的 可以查看 Notifiable 的 RoutesNotifications 
+    // Str::studly($driver)  首字母大写 查看是否有该方法 最后 发短信会调用 NewPaidOrderSMSNotify 类的 toEasySms
+    // if (method_exists($this, $method = 'routeNotificationFor'.Str::studly($driver))) {
+    //     return $this->{$method}($notification);
+    // }
+    
+    public function routeNotificationForEasySms($driver, $notification = null) {// 
+        return $this->mobile; 
+    }
 }

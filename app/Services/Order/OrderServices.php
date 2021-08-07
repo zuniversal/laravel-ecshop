@@ -20,16 +20,20 @@ use App\Models\Promotion\CouponUser;
 use App\Models\Promotion\Groupon;
 use App\Models\Promotion\GrouponRules;
 use App\Models\User\Address;
+use App\Notifications\NewPaidOrderEmailNotify;
+use App\Notifications\NewPaidOrderSMSNotify;
 use App\Services\BaseServices;
 use App\Services\Goods\GoodsServices;
 use App\Services\Promotion\CouponServices;
 use App\Services\Promotion\GrouponServices;
 use App\Services\User\AddressServices;
+use App\Services\User\UserServices;
 use App\SystemServices;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\AbstractFont;
@@ -287,5 +291,24 @@ class OrderServices extends BaseServices
       }
     }
     return true; 
+  }
+  // 8-19
+  public function payOrder(Order $order, $payId) {// 
+    if (!$order->canPayHandle()) {
+      $this->throwBussniessException(CodeResponse::ORDER_PAY_FAIL, '订单不能支付');
+    }
+    $order->pay_id = $payId;
+    $order->pay_time = now()->toDateTimeString();
+    $order->order_status = OrderEnums::STATUS_PAY;
+    if ($order->cas() == 0) {
+      $this->throwBussniessException(CodeResponse::UPDATED_FAIL);
+    }
+    GrouponServices::getInstance()->payGrouponOrder($order->id);
+
+    Notification::route('mail', env('MAIL_USERNAME'))
+      ->notify(new NewPaidOrderEmailNotify($order->id));
+    
+    $user = UserServices::getInstance()->getUserById($order->user_id);
+    $user->notify(new NewPaidOrderSMSNotify());
   }
 }

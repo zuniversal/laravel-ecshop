@@ -12,6 +12,7 @@ use App\Models\BaseModel;
 class Order extends BaseModel
 {
   use Notifiable;
+  use OrderStatusTrait;
 
   protected $fillable = [
   ];

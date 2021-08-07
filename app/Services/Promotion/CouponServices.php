@@ -272,5 +272,5 @@ class CouponServices extends BaseServices
         } 
         return $couponUsers->first();
     }
-
+    
 }

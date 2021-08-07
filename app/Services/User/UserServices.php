@@ -132,5 +132,11 @@ class UserServices extends BaseServices
             ->where('deleted', 0)
             ->get();
     }
+    // 8-19
+    public function getUserById($id)
+    {
+        return User::find($id);
+    }
+
 
 }
