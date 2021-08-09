@@ -554,13 +554,13 @@ class LearnController extends Controller
         // 8-19
         // 注意 还需要 修改 laravel/phpunit.xml 的 <server name="MAIL_MAILER" value="array"/> 
         // 为 smtp 否则会导致 邮件发不出去 并且 需要启动一个 worker 队列
-        $order = $this->getOrder()->refresh();
-        OrderServices::getInstance()->payOrder(
-            $order,
-            10
-        );
-        dd($order->refresh()->toArray());
-        return 666; 
+        // $order = $this->getOrder()->refresh();
+        // OrderServices::getInstance()->payOrder(
+        //      ,
+        //     10
+        // );
+        // dd($order->refresh()->toArray());
+        // return 666; 
 
         // 8-17
         $user = User::first(['id', 'username', 'nickname']);

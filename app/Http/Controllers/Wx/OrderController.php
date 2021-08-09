@@ -64,5 +64,32 @@ class OrderController extends WxController
       'grouponLikeId' => $input->grouponLinkId ?? 0,
     ]); 
   }
-
+  // 8-20
+  public function cancel() {// 
+    $orderId = $this->verifyId('orderId');
+    $list = OrderServices::getInstance()->userCancel(
+      // $this->userId(),
+      DEF_ID, 
+      $orderId
+    );
+    return $this->success();  
+  }
+  public function refund() {// 
+    $orderId = $this->verifyId('orderId');
+    $list = OrderServices::getInstance()->refund(
+      // $this->userId(),
+      DEF_ID, 
+      $orderId
+    );
+    return $this->success();  
+  }
+  public function confirm() {// 
+    $orderId = $this->verifyId('orderId');
+    $list = OrderServices::getInstance()->confirm(
+      // $this->userId(),
+      DEF_ID, 
+      $orderId
+    );
+    return $this->success();  
+  }
 }

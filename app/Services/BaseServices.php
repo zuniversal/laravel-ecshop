@@ -48,6 +48,10 @@ class BaseServices
     }
     // 8-10
     public function throwBadArgumentValue() {// 
-        throw new BussniessException(CodeResponse::PARAM_VALUE_ILLEGAL);
+      $this->throwBussniessException(CodeResponse::UPDATED_FAIL);
+    }
+    // 8-20
+    public function throwUpdateFail() {// 
+        throw new BussniessException(CodeResponse::UPDATED_FAIL);
     }
 }

@@ -279,18 +279,31 @@ class OrderServices extends BaseServices
     if ($order->cas() == 0) {
       $this->throwBussniessException(CodeResponse::UPDATED_FAIL);
     }
+    // $orderGoods = $this->getOrderGoodsList($orderId);
+    // // dd($orderGoods);
+    
+    // foreach ($orderGoods as $goods) {
+    //   $row = GoodsServices::getInstance()->addStock($goods->product_id, $goods->number); 
+    //   if ($row == 0) {
+    //     $this->throwBussniessException(CodeResponse::GOODS_NO_STOCK);
+    //   }
+    // }
+
+    // 8-20
+    $this->returnStock($orderId);
+
+    return true; 
+  }
+  // 8-20 提取封装
+  public function returnStock($orderId) {// 
     $orderGoods = $this->getOrderGoodsList($orderId);
     // dd($orderGoods);
-    
     foreach ($orderGoods as $goods) {
       $row = GoodsServices::getInstance()->addStock($goods->product_id, $goods->number); 
       if ($row == 0) {
-        $this->throwBussniessException(
-          CodeResponse::GOODS_NO_STOCK
-        );
+        $this->throwBussniessException(CodeResponse::GOODS_NO_STOCK);
       }
     }
-    return true; 
   }
   // 8-19
   public function payOrder(Order $order, $payId) {// 
@@ -310,5 +323,94 @@ class OrderServices extends BaseServices
     
     $user = UserServices::getInstance()->getUserById($order->user_id);
     $user->notify(new NewPaidOrderSMSNotify());
+  }
+  // 8-20
+  public function ship($userId, $orderId, $shipSn, $shipChannel) {// 
+    $order = $this->getOrderByUserIdAndId($userId, $orderId);
+    if (empty($order)) {
+      $this->throwBadArgumentValue();
+    }
+    if (!$order->canShipHandle()) {
+      $this->throwBussniessException(CodeResponse::ORDER_INVALID_OPERATION, '该订单不能发货');
+    }
+    $order->order_status = OrderEnums::STATUS_SHIP;
+    $order->ship_sn = $shipSn;
+    $order->ship_channel = $shipChannel;
+    $order->ship_time = now()->toDateTimeString();
+    if ($order->cas() == 0) {
+      $this->throwUpdateFail();
+    }
+    // 发通知 
+    return $order; 
+  }
+  public function refund($userId, $orderId) {// 
+    $order = $this->getOrderByUserIdAndId($userId, $orderId);
+    if (empty($order)) {
+      $this->throwBadArgumentValue();
+    }
+    if (!$order->canRefundHandle()) {
+      $this->throwBussniessException(CodeResponse::ORDER_INVALID_OPERATION, '该订单不能申请退款');
+    }
+    $order->order_status = OrderEnums::STATUS_SHIP;
+    if ($order->cas() == 0) {
+      $this->throwUpdateFail();
+    }
+    // 发通知 
+    return $order; 
+  }
+  // 获取订单数量
+  public function countOrderGoods($orderId) {
+    return OrderGoods::whereOrderId($orderId)->count(['id']);
+  }
+  // 同意退款
+  public function agreeRefund(Order $order, $refundType, $refundContent) {// 
+    if (!$order->canRefundHandle()) {
+      $this->throwBussniessException(CodeResponse::ORDER_INVALID_OPERATION, '该订单不能申请退款');
+    }
+    $now = now()->toDateTimeString();
+    $order->order_status = OrderEnums::STATUS_REFUND_CONFIRM;
+    $order->end_time = $now;
+    $order->refund_amount = $order->actual_price;
+    $order->refund_type = $refundType;
+    $order->refund_content = $refundContent;
+    $order->refund_time = $now;
+    if ($order->cas() == 0) {
+      $this->throwUpdateFail();
+    }
+
+    $this->returnStock($order->id);
+
+    // 发通知 
+    return $order; 
+  }
+  // $isAuto 是否主动确认收货
+  public function confirm($userId, $orderId, $isAuto = false) {// 
+    $order = $this->getOrderByUserIdAndId($userId, $orderId);
+    if (empty($order)) {
+      $this->throwBadArgumentValue();
+    }
+    if (!$order->canConfirmHandle()) {
+      $this->throwBussniessException(CodeResponse::ORDER_INVALID_OPERATION, '该订单不能确认收货');
+    }
+    $order->comments = $this->countOrderGoods($orderId);
+    $order->order_status = $isAuto ? OrderEnums::STATUS_AUTO_CONFIRM : OrderEnums::STATUS_SHIP;
+    $order->confirm_time = now()->toDateTimeString();
+    if ($order->cas() == 0) {
+      $this->throwUpdateFail();
+    }
+    // 发通知 
+    return $order; 
+  }
+  public function delete($userId, $orderId) {// 
+    $order = $this->getOrderByUserIdAndId($userId, $orderId);
+    if (empty($order)) {
+      $this->throwBadArgumentValue();
+    }
+    if (!$order->canDeleteHandle()) {
+      $this->throwBussniessException(CodeResponse::ORDER_INVALID_OPERATION, '该订单不能删除');
+    }
+    $order->delete();
+    // 售后删除
+    return $order; 
   }
 }
