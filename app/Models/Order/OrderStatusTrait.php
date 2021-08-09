@@ -18,10 +18,10 @@ trait OrderStatusTrait
   public function canShipHandle() {// 
     return $this->order_status == OrderEnums::STATUS_PAY; 
   }
-  public function canRefoundHandle() {// 
+  public function canRefundHandle() {// 
     return $this->order_status == OrderEnums::STATUS_PAY; 
   }
-  public function canAgreeRefoundHandle() {// 
+  public function canAgreeRefundHandle() {// 
     return $this->order_status == OrderEnums::STATUS_REFUND; 
   }
   public function canConfirmHandle() {// 
