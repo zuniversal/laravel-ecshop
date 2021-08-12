@@ -52,4 +52,8 @@ class SystemServices extends BaseServices
     public function getOrderUnpaidDelayMinutes() {// 
         return (int) $this->get(self::LITEMALL_ORDER_UNPAID);
     }
+    // 8-21
+    public function getOrderUnConfirmDays() {// 
+        return (int) $this->get(self::LITEMALL_ORDER_UNCONFIRM);
+    }
 }

@@ -37,4 +37,34 @@ trait OrderStatusTrait
       OrderEnums::STATUS_AUTO_CONFIRM,
     ]); 
   }
+  // 8-22
+  public function canCommentHandle() {// 
+    return in_array($this->order_status, [
+      OrderEnums::STATUS_CONFIRM,
+      OrderEnums::STATUS_AUTO_CONFIRM,
+    ]); 
+  }
+  public function CanRebuyHandle() {// 
+    return in_array($this->order_status, [
+      OrderEnums::STATUS_CONFIRM,
+      OrderEnums::STATUS_AUTO_CONFIRM,
+    ]); 
+  }
+  public function CanAfterSaleHandle() {// 
+    return in_array($this->order_status, [
+      OrderEnums::STATUS_CONFIRM,
+      OrderEnums::STATUS_AUTO_CONFIRM,
+    ]); 
+  }
+  public function CanHandleOptions() {// 
+    return [
+      'Cancel' => $this->canCancelHandle(),
+      'delete' => $this->canDeletehandle(),
+      'pay' => $this->canPayHandle(),
+      'comment' => $this->CancommentHandle(),
+      'refound' => $this->CanRefoundHandle(),
+      'rebuy' => $this->CanRebuyHandle(),
+      'aftersale' => $this->CanAfterSaleHandle(),
+    ];
+  }
 }

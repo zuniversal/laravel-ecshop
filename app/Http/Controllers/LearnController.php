@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\User\User;
 use App\Services\Order\CartServices;
 use App\Services\Order\OrderServices;
+use App\Services\Order\ExpressServices;
 use App\Services\Promotion\GrouponServices;
 use Exception;
 use Illuminate\Database\Query\Builder;
@@ -551,6 +552,12 @@ class LearnController extends Controller
 
     // 7-17
     function test() {
+        // 8-22
+        $res = ExpressServices::getInstance()->getOrderTraces('YTD', '123456');
+        return $res; 
+        // 8-21
+        OrderServices::getInstance()->autoConfirm();
+        return; 
         // 8-19
         // 注意 还需要 修改 laravel/phpunit.xml 的 <server name="MAIL_MAILER" value="array"/> 
         // 为 smtp 否则会导致 邮件发不出去 并且 需要启动一个 worker 队列

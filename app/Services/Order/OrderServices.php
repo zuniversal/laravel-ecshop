@@ -25,12 +25,14 @@ use App\Notifications\NewPaidOrderSMSNotify;
 use App\Services\BaseServices;
 use App\Services\Goods\GoodsServices;
 use App\Services\Promotion\CouponServices;
+use App\Services\Promotion\ExpressServices;
 use App\Services\Promotion\GrouponServices;
 use App\Services\User\AddressServices;
 use App\Services\User\UserServices;
 use App\SystemServices;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
@@ -39,6 +41,7 @@ use Illuminate\Support\Str;
 use Intervention\Image\AbstractFont;
 use Intervention\Image\Facades\Image;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Throwable;
 
 class OrderServices extends BaseServices
 {
@@ -233,17 +236,17 @@ class OrderServices extends BaseServices
       ->find($orderId);
   }
   public function userCancel($userId, $orderId) {// 
-    \DB::transaction(function () use($userId, $orderId) {
+    DB::transaction(function () use($userId, $orderId) {
       $this->cancel($userId, $orderId, 'user'); 
     });
   }
   public function systemCancel($userId, $orderId) {// 
-    \DB::transaction(function () use($userId, $orderId) {
+    DB::transaction(function () use($userId, $orderId) {
       $this->cancel($userId, $orderId, 'system'); 
     });
   }
   public function adminCancel($userId, $orderId) {// 
-    \DB::transaction(function () use($userId, $orderId) {
+    DB::transaction(function () use($userId, $orderId) {
       $this->cancel($userId, $orderId, 'admin');  
     });
   }
@@ -412,5 +415,69 @@ class OrderServices extends BaseServices
     $order->delete();
     // 售后删除
     return $order; 
+  }
+  // 8-21 超时取消 可以使用 延时队列 因此 系统超时确认也可以使用 队列
+  public function getTimeoutUnConfirmOrders() {// 
+    $days = SystemServices::getInstance()->getOrderUnConfirmDays(); 
+    return Order::query()
+      ->where('order_status', OrderEnums::STATUS_SHIP)
+      ->where('ship_time', '<=', now()->subDays($days))
+      ->where('ship_time', '>=', now()->subDays($days + 30))
+      ->get();
+  }
+  public function autoConfirm() {// 
+    $orders = $this->getTimeoutUnConfirmOrders();
+    // 可以在控制台输入  tailf storage/logs/laravel.log 查看日志
+    Log::info('开始自动确认收货===');
+    dd($orders);
+    foreach ($orders as $order) {
+      try {
+        $this->confirm($order->user_id, $order->id, true);
+      } catch (Throwable $e) {
+        // Throwable 捕获所有抛出来的异常 exception 是继承自 Throwable 
+        Log::error('自动确认错误===', $e->getMessage());
+      }
+    }
+  }
+  // 8-22
+  public function detail($userId, $orderId) {// 
+    $order = $this->getOrderByUserIdAndId($userId, $orderId);
+    if (empty($order)) {
+      $this->throwBadArgumentValue();
+    }
+    $detail = Arr::only(
+      $order->toArray(), [
+        'id',
+        'orderSn',
+        'message',
+        'addTime',
+        'consignee',
+        'mobile',
+        'address',
+        'goodsPrice',
+        'couponPrice',
+        'freighPrice',
+        'actualPrice',
+        'aftersaleSatus',
+      ]
+    );
+
+    $detail['orderStatusText'] = OrderEnums::STATUS_TEXT_MAP[$order->order_status] ?? '';
+    $detail['handleOptions'] = $order->getCanHandleOptions();
+
+    $goodsList = $this->getOrderGoodsList($orderId);
+    $express = [];
+     
+    if ($order->order_status == OrderEnums::STATUS_SHIP) {
+      $detail['expCode'] = $order->ship_channel;
+      $detail['expNo'] = $order->ship_sn;
+      $detail['expName'] = ExpressServices::getInstance()->getExpressName($order->ship_channel);
+      $express = ExpressServices::getInstance()->getOrderTraces($order->ship_channel, $order->ship_sn);
+    }
+    return [
+      'orderInfo' => $detail,
+      'orderGoods' => $goodsList,
+      'expressInfo' => $express
+    ];
   }
 }
