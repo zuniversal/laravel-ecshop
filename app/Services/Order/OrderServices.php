@@ -25,7 +25,6 @@ use App\Notifications\NewPaidOrderSMSNotify;
 use App\Services\BaseServices;
 use App\Services\Goods\GoodsServices;
 use App\Services\Promotion\CouponServices;
-use App\Services\Promotion\ExpressServices;
 use App\Services\Promotion\GrouponServices;
 use App\Services\User\AddressServices;
 use App\Services\User\UserServices;

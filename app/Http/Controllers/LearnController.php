@@ -7,6 +7,7 @@ use App\Inputs\OrderSubmitInput;
 use App\Jobs\OrderUnpaidTimeEndJob;
 use App\Models\Goods\Goods;
 use App\Models\Goods\GoodsProduct;
+use App\Models\Order\Order;
 use App\Models\Product;
 use App\Models\User\User;
 use App\Services\Order\CartServices;
@@ -552,6 +553,15 @@ class LearnController extends Controller
 
     // 7-17
     function test() {
+        // 8-23
+        $order = Order::find(1);
+        // dd($order);// 
+        // 注意 需要是调用不存在的方法才会介入
+        // $order->canCancelHandle('xxx');
+        // $order->canCancelxHandle('xxx');
+        // $order->canConfirmxHandle('xxx');
+        $order->isAutoConfirmStatus();
+        return ; 
         // 8-22
         $res = ExpressServices::getInstance()->getOrderTraces('YTD', '123456');
         return $res; 
