@@ -27,6 +27,7 @@ use App\Services\Promotion\GrouponServices;
 use App\Services\Promotion\CouponServices;
 use App\Services\User\AddressServices;
 use App\SystemServices;
+use Yansongda\Pay\Pay;
 
 const DEF_ID = 1;
 const DEF_MOBILE = 15160208607;
@@ -35,6 +36,10 @@ const DEF_PASS = 1;
 class OrderController extends WxController
 {
   protected $only = [
+    
+  ];
+  protected $except = [
+    'wxNotify'
   ];
   // 提交订单
   public function submit() {// 
@@ -109,5 +114,26 @@ class OrderController extends WxController
       $orderId
     );
     return $this->success($detail);  
+  }
+  // 9-2
+  public function hyPay() {// 
+    $orderId = $this->verifyId('orderId');
+    $order = OrderServices::getInstance()->getWxPayOrder(
+      // $this->userId(),
+      DEF_ID, 
+      $orderId
+    );
+    return Pay::wechat()->wap($order);
+  }
+  // 问下支付回调 无登录状态
+  public function wxNotify() {// 
+    // 验证微信回调回来的接口 验签 支付结果 等的验证 验证完成会获取到一个 data 里面包含支付相关信息 
+    $data = Pay::wechat()->verify();
+    $data = $data->toArray();
+    Log::info('wxNotify', $data);
+    DB::transaction(function () use ($data) {
+      OrderServices::getInstance()->wxNotify($data);
+    });
+    return Pay::wechat()->success();
   }
 }

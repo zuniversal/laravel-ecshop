@@ -10,7 +10,7 @@ use Leonis\Notifications\EasySms\Channels\EasySmsChannel;
 use Leonis\Notifications\EasySms\Messages\EasySmsMessage;
 
 class NewPaidOrderSMSNotify extends Notification
-implements ShouldQueue// 默认是头部发送 如果要使用 redis 队列 需要继承该接口 实现异步化发送
+implements ShouldQueue// 默认是同步发送 如果要使用 redis 队列 需要继承该接口 实现异步化发送
 {
     use Queueable;
 

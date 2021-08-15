@@ -163,4 +163,13 @@ trait OrderStatusTrait
     } 
     return parent::__call($name, $arguments);
   }
+  // 9-2 是否支付过是很多个状态
+  public function isHadpaid() {// 
+    return !in_array($this->order_status, [
+      OrderEnums::STATUS_CREATE,
+      OrderEnums::STATUS_ADMIN_CANCEL,
+      OrderEnums::STATUS_AUTO_CONFIRM,
+      OrderEnums::STATUS_CANCEL
+    ]);
+  }
 }

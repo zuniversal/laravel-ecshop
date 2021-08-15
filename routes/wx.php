@@ -17,6 +17,28 @@ use Illuminate\Support\Facades\Route;
 
 // 8-10 复杂场景单元测试的前提是每个方法都进行好的抽象  才鞥呢在它的基础上做好单元测试
 
+// 9-2
+// 封装了 支付宝 微信支付接口  https://github.com/yansongda/pay
+// 可以使用 laravel 版 第三方包  https://github.com/yansongda/laravel-pay
+
+// 1. composer require yansongda/laravel-pay -vvv
+
+// 2. 会生成如下文件  config/pay.php
+// php artisan vendor:publish --provider="Yansongda\LaravelPay\PayServiceProvider" --tag=laravel-pay
+
+// 复制如下 代码 到 env 文件
+
+// # alipay CCÏ
+// ALI_APP_ID=
+// ALI_PUBLIC_KEY=
+// ALI_PRIVATE_KEY=
+// # wechat
+// WECHAT_APP_ID=
+// WECHAT_MINIAPP_ID=
+// WECHAT_APPID=
+// WECHAT_MCH_ID=
+// WECHAT_KEY=
+
 
 
 // 6-1

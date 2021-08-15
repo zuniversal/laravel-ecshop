@@ -41,6 +41,7 @@ use Intervention\Image\AbstractFont;
 use Intervention\Image\Facades\Image;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Throwable;
+use Yansongda\Pay\Pay;
 
 class OrderServices extends BaseServices
 {
@@ -325,6 +326,7 @@ class OrderServices extends BaseServices
     
     $user = UserServices::getInstance()->getUserById($order->user_id);
     $user->notify(new NewPaidOrderSMSNotify());
+    return $order;// 9-2 
   }
   // 8-20
   public function ship($userId, $orderId, $shipSn, $shipChannel) {// 
@@ -478,5 +480,47 @@ class OrderServices extends BaseServices
       'orderGoods' => $goodsList,
       'expressInfo' => $express
     ];
+  }
+  // 9-2
+  public function getWxPayOrder($userId, $orderId) {// 
+    $order = $this->getOrderByUserIdAndId($userId, $orderId);
+    if (empty($order)) {
+      $this->throwBadArgumentValue();
+    }
+    if (!$order->canPayHandle()) {
+      $this->throwBussniessException(CodeResponse::ORDER_PAY_FAIL, '该订单不能支付');
+    }
+    $order = [
+      'out_trade_no' => $order->order_sn,
+      'body' => '订单：'.$order->order_sn,
+      // 微信支付的金额是以分为单位
+      'total_fee' => bcmul($order->actual_price, 100)
+    ];
+    // wap 结果就是一个 response 但是在服务层处理不合适 所以将该代码提取到 控制层 这里只返回订单
+    return Pay::wechat()->wap($order);
+  }
+  public function getOrderBySn($orderSn) {// 
+    return Order::query()
+      ->where('order_sn', $orderSn)
+      ->first();
+  }
+  public function wxNotify(array $data) {// 
+    // 还需要判断下断点是否已支付
+    $orderSn = $data['out_trade_no'] ?? '';
+    $payId = $data['transaction_id'] ?? '';
+    $price = bcdiv($data['total_fee'], 100, 2);// 价格也是分
+
+    $order = $this->getOrderBySn($orderSn);
+    if (is_null($order)) {
+      $this->throwBussniessException(CodeResponse::ORDER_UNKNOWN);
+    }
+    if ($order->isHadPaid()) {
+      return $order; 
+    }
+    // 金额与传入金额是否一致
+    if (bccomp($order->actual_price, $price, 2) != 0) {
+      $this->throwBussniessException(CodeResponse::FAIL, '支付回调，订单【{$order->id}}金额不一致，订单金额[$order->actual_price]  ');
+    }
+    $this->payOrder($order, $payId);
   }
 }
